@@ -18,7 +18,9 @@
 using namespace std;
 
 class Message;
+class NetworkInterface;
 class P2PNetworkInterface;
+class WirelessNetworkInterface;
 
 typedef std::shared_ptr<Message> MessagePtr;
 
@@ -43,7 +45,7 @@ protected:
 public:
 	uint64_t id;
 	unsigned int type;
-	P2PNetworkInterface *sourceInterface, *destinationInterface;
+	NetworkInterface *sourceInterface, *destinationInterface;
 
 	Message();
 	virtual ~Message();
@@ -72,27 +74,41 @@ class MessageOf:public Message {
 
 //===========================================================================================================
 //
+//	    NetworkInterface  (class)
+//
+//===========================================================================================================
+class NetworkInterface {
+protected :
+	static unsigned int nextId;
+	static int defaultDataRate;
+
+	BaseSimulator::Rate* dataRate;
+public:
+	unsigned int globalId;
+	unsigned int localId;
+	deque<MessagePtr> outgoingQueue;
+	BaseSimulator::BuildingBlock * hostBlock;
+	Time availabilityDate;
+	NetworkInterface *connectedInterface;
+
+	MessagePtr messageBeingTransmitted;
+
+	NetworkInterface(BaseSimulator::BuildingBlock *b);
+	virtual ~NetworkInterface() = 0;
+
+	virtual void send(Message *m) = 0;
+	virtual void send() = 0;
+};
+
+
+//===========================================================================================================
+//
 //          P2PNetworkInterface  (class)
 //
 //===========================================================================================================
 
-class P2PNetworkInterface {
-protected:
-	static unsigned int nextId;
-	static int defaultDataRate;
-	
-	BaseSimulator::Rate* dataRate;
+class P2PNetworkInterface : public NetworkInterface {
 public:
-	
-	unsigned int globalId;
-	unsigned int localId;
-	deque<MessagePtr> outgoingQueue;
-
-	P2PNetworkInterface *connectedInterface;
-	BaseSimulator::BuildingBlock *hostBlock;
-	Time availabilityDate;
-
-	MessagePtr messageBeingTransmitted;
 
 	P2PNetworkInterface(BaseSimulator::BuildingBlock *b);
 	~P2PNetworkInterface();
@@ -110,6 +126,24 @@ public:
 	
 	void setDataRate(BaseSimulator::Rate* r); 
 	Time getTransmissionDuration(MessagePtr &m);
+
 };
 
+//==========================================================================================================
+//
+//	WirelessNetworkInterface  (class)
+//
+//==========================================================================================================
+
+class WirelessNetworkInterface : public NetworkInterface {
+protected:
+	 unsigned int range;
+public:
+	WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, int Wrange): NetworkInterface(b){
+	range=Wrange;
+	};
+	~WirelessNetworkInterface();
+	void send(Message *m);
+	void setRange(int dist);
+};
 #endif /* NETWORK_H_ */

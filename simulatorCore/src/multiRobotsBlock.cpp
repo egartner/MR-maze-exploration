@@ -15,6 +15,7 @@
 #include "meldInterpretEvents.h"
 #include "trace.h"
 #include "clock.h"
+#include "network.h"
 
 using namespace std;
 
@@ -23,6 +24,12 @@ namespace MultiRobots {
 MultiRobotsBlock::MultiRobotsBlock(int bId, BlockCodeBuilder bcb)
 	: BaseSimulator::BuildingBlock(bId, bcb, BCLattice::MAX_NB_NEIGHBORS) {
     OUTPUT << "MultiRobotsBlock constructor" << endl;
+
+    for( int i=0 ; i<BCLattice::MAX_NB_NEIGHBORS ; i++)
+	P2PNetworkInterfaces.pop_back();
+
+    for( int i =0 ; i<BCLattice::MAX_NB_NEIGHBORS ; i++)
+	P2PNetworkInterfaces.push_back(new WirelessNetworkInterface(this,2));
 }
 
 MultiRobotsBlock::~MultiRobotsBlock() {
@@ -46,6 +53,12 @@ void MultiRobotsBlock::stopBlock(Time date, State s) {
 	if (BaseSimulator::Simulator::getType() == BaseSimulator::Simulator::MELDINTERPRET) {
 		getScheduler()->schedule(new MeldInterpret::VMStopEvent(getScheduler()->now(), this));
     }
+}
+
+void MultiRobotsBlock::setRange (int dist){
+	for(int i=0 ; i<BCLattice::MAX_NB_NEIGHBORS ; i++){
+		P2PNetworkInterfaces[i]->setRange(dist);
+	}
 }
 
 std::ostream& operator<<(std::ostream &stream, MultiRobotsBlock const& bb) {

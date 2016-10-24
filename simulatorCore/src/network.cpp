@@ -7,12 +7,14 @@
 
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 #include "scheduler.h"
 #include "network.h"
 #include "trace.h"
 #include "statsIndividual.h"
 #include "utils.h"
+
 
 using namespace std;
 using namespace BaseSimulator;
@@ -23,8 +25,8 @@ using namespace BaseSimulator::utils;
 uint64_t Message::nextId = 0;
 uint64_t Message::nbMessages = 0;
 
-unsigned int P2PNetworkInterface::nextId = 0;
-int P2PNetworkInterface::defaultDataRate = 1000000;
+unsigned int NetworkInterface::nextId = 0;
+int NetworkInterface::defaultDataRate = 1000000;
 
 //===========================================================================================================
 //
@@ -60,22 +62,30 @@ Message* Message::clone() {
     return ptr;
 }
 
+//==========================================================================================================
+//
+//	    NetworkInterface  (class)
+//
+//==========================================================================================================
+NetworkInterface::NetworkInterface(BaseSimulator::BuildingBlock *b){
+	hostBlock = b;
+	availabilityDate=0;
+	globalId=nextId;
+	nextId++;
+	dataRate = new StaticRate(defaultDataRate);
+	connectedInterface = NULL;	
+}
+
 //===========================================================================================================
 //
 //          P2PNetworkInterface  (class)
 //
 //===========================================================================================================
 
-P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b) {
+P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b):NetworkInterface(b) {
 #ifndef NDEBUG
 	OUTPUT << "P2PNetworkInterface constructor" << endl;
 #endif
-	hostBlock = b;
-	connectedInterface = NULL;
-	availabilityDate = 0;
-	globalId = nextId;
-	nextId++;
-	dataRate = new StaticRate(defaultDataRate);
 }
 
 void P2PNetworkInterface::setDataRate(Rate *r) {
@@ -182,4 +192,33 @@ Time P2PNetworkInterface::getTransmissionDuration(MessagePtr &m) {
 
 bool P2PNetworkInterface::isConnected() {
   return connectedInterface != NULL;
+}
+
+//======================================================================================================
+//
+//		WirelessNetworkInterface(class)
+//
+//======================================================================================================
+
+
+WirelessNetworkInterface::~WirelessNetworkInterface(){
+#ifndef NDEBUG
+	OUTPUT<< "WirelessNetworkInterface destructor" << endl;
+#endif
+}
+
+/*Send the message if the destination robot is within range*/
+void WirelessNetworkInterface::send(Message *m){
+	double distance;
+	Vector3D vec1;
+	Vector3D vec2;
+	vec1=m->sourceInterface->hostBlock->getPositionVector();
+	vec2=m->destinationInterface->hostBlock->getPositionVector();
+	distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
+	if (distance < this->range)
+		getScheduler()->schedule(new NetworkInterfaceEnqueueOutgoingEvent(getScheduler()->now(),m,this));
+}
+
+void WirelessNetworkInterface::setRange(int dist){
+	this->range = dist;
 }

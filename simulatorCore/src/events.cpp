@@ -164,7 +164,7 @@ const string ProcessLocalEvent::getEventName() {
 //
 //===========================================================================================================
 
-NetworkInterfaceStartTransmittingEvent::NetworkInterfaceStartTransmittingEvent(Time t, P2PNetworkInterface *ni):Event(t) {
+NetworkInterfaceStartTransmittingEvent::NetworkInterfaceStartTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_START_TRANSMITTING;
 	interface = ni;
 	EVENT_CONSTRUCTOR_INFO();
@@ -188,7 +188,7 @@ const string NetworkInterfaceStartTransmittingEvent::getEventName() {
 //
 //===========================================================================================================
 
-NetworkInterfaceStopTransmittingEvent::NetworkInterfaceStopTransmittingEvent(Time t, P2PNetworkInterface *ni):Event(t) {
+NetworkInterfaceStopTransmittingEvent::NetworkInterfaceStopTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_STOP_TRANSMITTING;
 	interface = ni;
 	EVENT_CONSTRUCTOR_INFO();
@@ -227,7 +227,7 @@ const string NetworkInterfaceStopTransmittingEvent::getEventName() {
 //
 //===========================================================================================================
 
-NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, P2PNetworkInterface *ni, MessagePtr mes):Event(t) {
+NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
 	eventType = EVENT_NI_RECEIVE;
 	interface = ni;
 	message = mes;
@@ -253,7 +253,7 @@ const string NetworkInterfaceReceiveEvent::getEventName() {
 //
 //===========================================================================================================
 
-NetworkInterfaceEnqueueOutgoingEvent::NetworkInterfaceEnqueueOutgoingEvent(Time t, Message *mes, P2PNetworkInterface *ni):Event(t) {
+NetworkInterfaceEnqueueOutgoingEvent::NetworkInterfaceEnqueueOutgoingEvent(Time t, Message *mes, NetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_ENQUEUE_OUTGOING_MESSAGE;
 	message = MessagePtr(mes);
 	sourceInterface = ni;

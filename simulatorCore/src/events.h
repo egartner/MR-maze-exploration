@@ -146,9 +146,9 @@ public:
 
 class NetworkInterfaceStartTransmittingEvent : public Event {
 public:
-	P2PNetworkInterface *interface;
+	NetworkInterface *interface;
 
-	NetworkInterfaceStartTransmittingEvent(Time, P2PNetworkInterface *ni);
+	NetworkInterfaceStartTransmittingEvent(Time, NetworkInterface *ni);
 	~NetworkInterfaceStartTransmittingEvent();
 	void consume();
 	const virtual string getEventName();
@@ -162,9 +162,9 @@ public:
 
 class NetworkInterfaceStopTransmittingEvent : public Event {
 public:
-	P2PNetworkInterface *interface;
+	NetworkInterface *interface;
 
-	NetworkInterfaceStopTransmittingEvent(Time, P2PNetworkInterface *ni);
+	NetworkInterfaceStopTransmittingEvent(Time, NetworkInterface *ni);
 	~NetworkInterfaceStopTransmittingEvent();
 	void consume();
 	const virtual string getEventName();
@@ -180,7 +180,7 @@ class NetworkInterfaceReceiveEvent : public Event {
 public:
 	P2PNetworkInterface *interface;
 	MessagePtr message;
-	NetworkInterfaceReceiveEvent(Time,P2PNetworkInterface *ni, MessagePtr mes);
+	NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
 	~NetworkInterfaceReceiveEvent();
 	void consume();
 	const virtual string getEventName();
@@ -197,8 +197,8 @@ public:
 	MessagePtr message;
 	P2PNetworkInterface *sourceInterface;
 
-	NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, P2PNetworkInterface *ni);
-	NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, P2PNetworkInterface *ni);
+	NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, NetworkInterface *ni);
+	NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, NetworkInterface *ni);
 	~NetworkInterfaceEnqueueOutgoingEvent();
 	void consume();
 	const virtual string getEventName();

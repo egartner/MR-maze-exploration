@@ -34,6 +34,7 @@ public:
 	void removeNeighbor(P2PNetworkInterface *ni) {};
 	void stopBlock(Time date, State s);
 	void pauseClock(Time delay, Time start);
+	void setRange (int dist);
 };
 
 std::ostream& operator<<(std::ostream &stream, MultiRobotsBlock const& bb);

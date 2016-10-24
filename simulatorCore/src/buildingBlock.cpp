@@ -211,7 +211,7 @@ void BuildingBlock::setPosition(const Cell3DPosition &p) {
     position = p;
     getWorld()->updateGlData(this);
 }
-    
+
 void BuildingBlock::tap(Time date, int face) {
     OUTPUT << "tap scheduled" << endl;
     getScheduler()->schedule(new TapEvent(date, this, (uint8_t)face));
