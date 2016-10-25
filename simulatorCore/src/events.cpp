@@ -266,15 +266,6 @@ WirelessNetworkInterfaceStopTransmittingEvent::~WirelessNetworkInterfaceStopTran
 
 void WirelessNetworkInterfaceStopTransmittingEvent::consume() {
     EVENT_CONSUME_INFO();
-    /*
-    if (!interface->connectedInterface) {
-        ERRPUT << "Warning: connection loss, untransmitted message!" << endl;
-    } else {
-        BaseSimulator::BuildingBlock *receivingBlock = interface->connectedInterface->hostBlock;
-        receivingBlock->scheduleLocalEvent(EventPtr(new NetworkInterfaceReceiveEvent(BaseSimulator::getScheduler()->now(), interface->connectedInterface, interface->messageBeingTransmitted)));
-        BaseSimulator::utils::StatsIndividual::incReceivedMessageCount(receivingBlock->stats);
-        BaseSimulator::utils::StatsIndividual::incIncommingMessageQueueSize(receivingBlock->stats);
-    }
     
     interface->messageBeingTransmitted.reset();
     interface->availabilityDate = BaseSimulator::getScheduler()->now();
@@ -283,7 +274,6 @@ void WirelessNetworkInterfaceStopTransmittingEvent::consume() {
         //cout << "one more to send !!" << endl;
         interface->send();
     }
-    */
 }
 
 const string WirelessNetworkInterfaceStopTransmittingEvent::getEventName() {
@@ -315,6 +305,34 @@ void NetworkInterfaceReceiveEvent::consume() {
 
 const string NetworkInterfaceReceiveEvent::getEventName() {
 	return("NetworkInterfaceReceiveEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStartReceiveEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceStartReceiveEvent::WirelessNetworkInterfaceStartReceiveEvent(Time t, WirelessNetworkInterface *ni, WirelessMessagePtr mes):Event(t) {
+    eventType = EVENT_WNI_START_RECEIVE;
+    interface = ni;
+    message = mes;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceStartReceiveEvent::~WirelessNetworkInterfaceStartReceiveEvent() {
+    message.reset();
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStartReceiveEvent::consume() {
+    interface->startReceive(message);
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceStartReceiveEvent::getEventName() {
+    return("WirelessNetworkInterfaceStartReceiveEvent Event");
 }
 
 //===========================================================================================================

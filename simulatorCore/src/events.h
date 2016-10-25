@@ -229,6 +229,23 @@ public:
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceStartReceiveEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceStartReceiveEvent : public Event {
+public:
+    WirelessNetworkInterface *interface;
+    WirelessMessagePtr message;
+    //NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
+    WirelessNetworkInterfaceStartReceiveEvent(Time,WirelessNetworkInterface *ni, WirelessMessagePtr mes);
+    ~WirelessNetworkInterfaceStartReceiveEvent();
+    void consume();
+    const virtual string getEventName();
+};
+
+//===========================================================================================================
+//
 //          NetworkInterfaceEnqueueOutgoingEvent  (class)
 //
 //===========================================================================================================

@@ -90,10 +90,10 @@ public:
     unsigned int type;
 
     WirelessNetworkInterface *sourceInterface;
-    unsigned int destinationId;
+    bID destinationId;
     //, *destinationInterface;
     
-    WirelessMessage(unsigned int destId);
+    WirelessMessage(bID destId);
     virtual ~WirelessMessage();
     
     static uint64_t getNbMessages();
@@ -107,7 +107,7 @@ template <class T>
 class WirelessMessageOf:public WirelessMessage {
     T *ptrData;
     public :
-    WirelessMessageOf(int t,const T &data, unsigned int destId):WirelessMessage(destId) { type=t; ptrData = new T(data);};
+    WirelessMessageOf(int t,const T &data, bID destId):WirelessMessage(destId) { type=t; ptrData = new T(data);};
     ~WirelessMessageOf() { delete ptrData; };
     T* getData() const { return ptrData; };
     virtual WirelessMessage* clone() {
@@ -235,6 +235,8 @@ public:
 	~WirelessNetworkInterface();
     bool addToOutgoingBuffer(WirelessMessagePtr msg);
 	void send();
+    void startReceive(WirelessMessagePtr msg);
 	void setPower(int power);
+	Time getTransmissionDuration(WirelessMessagePtr &m);
 };
 #endif /* NETWORK_H_ */

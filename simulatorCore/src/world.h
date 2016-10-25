@@ -316,6 +316,16 @@ public:
      * @brief Toggle world background
      */
     void toggleBackground() { background = !background; }
+    
+    void broadcastWirelessMessage(WirelessMessagePtr msg) {
+        std::map<bID, BuildingBlock*>::iterator itMap;
+        bID sourceID = msg->sourceInterface->hostBlock->blockId;
+        for (itMap = buildingBlocksMap.begin(); itMap != buildingBlocksMap.end(); itMap++) {
+            if (itMap->first != sourceID) {
+                BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartReceiveEvent(BaseSimulator::getScheduler()->now(), itMap->second->getWirelessNetworkInterface(), msg));
+            }
+        }
+    }
 };
 
 /**

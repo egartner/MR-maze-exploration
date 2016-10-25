@@ -14,6 +14,7 @@
 #include "trace.h"
 #include "statsIndividual.h"
 #include "utils.h"
+#include "world.h"
 
 
 using namespace std;
@@ -76,7 +77,7 @@ Message* Message::clone() {
 //
 //===========================================================================================================
 
-WirelessMessage::WirelessMessage(unsigned int destId) {
+WirelessMessage::WirelessMessage(bID destId) {
     id = nextId;
     destinationId = destId;
     nextId++;
@@ -277,17 +278,62 @@ void WirelessNetworkInterface::send(){
     // ici il va falloir faire une boucle pour envoyer à toutes les cartes réseau des environs
     // Il faut récupérer la map de l'objet World
     
-//	double distance;
-//	Vector3D vec1;
-//	Vector3D vec2;
-//	vec1=m->sourceInterface->hostBlock->getPositionVector();
-//	vec2=m->destinationInterface->hostBlock->getPositionVector();
-//	distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
-//		getScheduler()->schedule(new NetworkInterfaceEnqueueOutgoingEvent(getScheduler()->now(),m,this));
+    // ATTENTION, pour l'instant l'interface fonctionne en full duplex ... elle peut émettre en même temps qu'elle reçoit
+    // C'EST PHYSIQUEMENT IMPOSSIBLE
+    // Il va falloir gérer cela ...
+    
+    
+    
+    WirelessMessagePtr msg;
+    stringstream info;
+    Time transmissionDuration;
+    
+    if (outgoingQueue.size()==0) {
+        info << "*** ERROR *** [block " << hostBlock->blockId << ",wireless interface " << globalId <<"] : The outgoing buffer of this interface should not be empty !";
+        BaseSimulator::getScheduler()->trace(info.str());
+        exit(EXIT_FAILURE);
+    }
+    
+    msg = outgoingQueue.front();
+    outgoingQueue.pop_front();
+
+    transmissionDuration = getTransmissionDuration(msg);
+    messageBeingTransmitted = msg;
+    messageBeingTransmitted->sourceInterface = this;
+    
+    BaseSimulator::getWorld()->broadcastWirelessMessage(msg);
+    
+    availabilityDate = BaseSimulator::getScheduler()->now()+transmissionDuration;
+    /*	info << "*** sending (interface " << localId << " of block " << hostBlock->blockId << ")";
+     getScheduler()->trace(info.str());*/
+    
+    BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopTransmittingEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+}
+
+void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
+    // ici il faut calculer l'atténuation en fonction de la distance et choisir si le paquet sera compris ou non
+    // Si il est compris, il faut regarder si il nous est destiné
+    // Si il nous est destiné, il faut le passer à la couche supérieure (scheduleLocalEvent)
+    
+    double distance;
+    Vector3D vec1;
+    Vector3D vec2;
+    vec1=msg->sourceInterface->hostBlock->getPositionVector();
+    vec2=this->hostBlock->getPositionVector();
+    distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
+    
+    // [...]
 }
 
 void WirelessNetworkInterface::setPower(int power){
 	this->transmitPower = power;
+}
+
+Time WirelessNetworkInterface::getTransmissionDuration(WirelessMessagePtr &m) {
+    double rate = dataRate->get();
+    Time transmissionDuration = (m->size()*8000000ULL)/rate;
+    //cerr << "TransmissionDuration: " << transmissionDuration << endl;
+    return transmissionDuration;
 }
 
 bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
