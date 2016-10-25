@@ -146,12 +146,32 @@ public:
 
 class NetworkInterfaceStartTransmittingEvent : public Event {
 public:
-	NetworkInterface *interface;
+	//NetworkInterface *interface;
+    P2PNetworkInterface *interface;
 
-	NetworkInterfaceStartTransmittingEvent(Time, NetworkInterface *ni);
+	//NetworkInterfaceStartTransmittingEvent(Time, NetworkInterface *ni);
+    NetworkInterfaceStartTransmittingEvent(Time, P2PNetworkInterface *ni);
 	~NetworkInterfaceStartTransmittingEvent();
 	void consume();
 	const virtual string getEventName();
+};
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStartTransmittingEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceStartTransmittingEvent : public Event {
+public:
+    //NetworkInterface *interface;
+    WirelessNetworkInterface *interface;
+    
+    //NetworkInterfaceStartTransmittingEvent(Time, NetworkInterface *ni);
+    WirelessNetworkInterfaceStartTransmittingEvent(Time, WirelessNetworkInterface *ni);
+    ~WirelessNetworkInterfaceStartTransmittingEvent();
+    void consume();
+    const virtual string getEventName();
 };
 
 //===========================================================================================================
@@ -162,10 +182,30 @@ public:
 
 class NetworkInterfaceStopTransmittingEvent : public Event {
 public:
-	NetworkInterface *interface;
+    //NetworkInterface *interface;
+    P2PNetworkInterface *interface;
+    
+    //NetworkInterfaceStopTransmittingEvent(Time, NetworkInterface *ni);
+    NetworkInterfaceStopTransmittingEvent(Time, P2PNetworkInterface *ni);
+    ~NetworkInterfaceStopTransmittingEvent();
+    void consume();
+    const virtual string getEventName();
+};
 
-	NetworkInterfaceStopTransmittingEvent(Time, NetworkInterface *ni);
-	~NetworkInterfaceStopTransmittingEvent();
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStopTransmittingEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceStopTransmittingEvent : public Event {
+public:
+	//NetworkInterface *interface;
+	WirelessNetworkInterface *interface;
+
+	//NetworkInterfaceStopTransmittingEvent(Time, NetworkInterface *ni);
+    WirelessNetworkInterfaceStopTransmittingEvent(Time, WirelessNetworkInterface *ni);
+	~WirelessNetworkInterfaceStopTransmittingEvent();
 	void consume();
 	const virtual string getEventName();
 };
@@ -180,7 +220,8 @@ class NetworkInterfaceReceiveEvent : public Event {
 public:
 	P2PNetworkInterface *interface;
 	MessagePtr message;
-	NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
+    //NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
+	NetworkInterfaceReceiveEvent(Time,P2PNetworkInterface *ni, MessagePtr mes);
 	~NetworkInterfaceReceiveEvent();
 	void consume();
 	const virtual string getEventName();
@@ -197,13 +238,38 @@ public:
 	MessagePtr message;
 	P2PNetworkInterface *sourceInterface;
 
-	NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, NetworkInterface *ni);
-	NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, NetworkInterface *ni);
+    //NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, NetworkInterface *ni);
+    //NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, NetworkInterface *ni);
+
+	NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, P2PNetworkInterface *ni);
+	NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, P2PNetworkInterface *ni);
 	~NetworkInterfaceEnqueueOutgoingEvent();
 	void consume();
 	const virtual string getEventName();
 };
 
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceEnqueueOutgoingEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceEnqueueOutgoingEvent : public Event {
+private:
+    unsigned int destinationId;
+public:
+    WirelessMessagePtr message;
+    WirelessNetworkInterface *sourceInterface;
+    
+    //NetworkInterfaceEnqueueOutgoingEvent(Time, Message *mes, NetworkInterface *ni);
+    //NetworkInterfaceEnqueueOutgoingEvent(Time, MessagePtr mes, NetworkInterface *ni);
+    
+    WirelessNetworkInterfaceEnqueueOutgoingEvent(Time, WirelessMessage *mes, WirelessNetworkInterface *ni);
+    WirelessNetworkInterfaceEnqueueOutgoingEvent(Time, WirelessMessagePtr mes, WirelessNetworkInterface *ni);
+    ~WirelessNetworkInterfaceEnqueueOutgoingEvent();
+    void consume();
+    const virtual string getEventName();
+};
 
 //===========================================================================================================
 //

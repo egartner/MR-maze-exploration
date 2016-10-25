@@ -29,7 +29,8 @@ MultiRobotsBlock::MultiRobotsBlock(int bId, BlockCodeBuilder bcb)
 	P2PNetworkInterfaces.pop_back();
 
     for( int i =0 ; i<BCLattice::MAX_NB_NEIGHBORS ; i++)
-	P2PNetworkInterfaces.push_back(new WirelessNetworkInterface(this,2));
+	//P2PNetworkInterfaces.push_back(new WirelessNetworkInterface(this,2));
+	P2PNetworkInterfaces.push_back(new P2PNetworkInterface(this));
 }
 
 MultiRobotsBlock::~MultiRobotsBlock() {
@@ -57,7 +58,7 @@ void MultiRobotsBlock::stopBlock(Time date, State s) {
 
 void MultiRobotsBlock::setRange (int dist){
 	for(int i=0 ; i<BCLattice::MAX_NB_NEIGHBORS ; i++){
-		P2PNetworkInterfaces[i]->setRange(dist);
+		//P2PNetworkInterfaces[i]->setRange(dist);
 	}
 }
 

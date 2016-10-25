@@ -24,9 +24,17 @@ using namespace BaseSimulator::utils;
 //unsigned int Message::nbMessages = 0;
 uint64_t Message::nextId = 0;
 uint64_t Message::nbMessages = 0;
+uint64_t WirelessMessage::nextId = 0;
+uint64_t WirelessMessage::nbMessages = 0;
+
 
 unsigned int NetworkInterface::nextId = 0;
 int NetworkInterface::defaultDataRate = 1000000;
+unsigned int P2PNetworkInterface::nextId = 0;
+int P2PNetworkInterface::defaultDataRate = 1000000;
+unsigned int WirelessNetworkInterface::nextId = 0;
+int WirelessNetworkInterface::defaultDataRate = 1000000;
+
 
 //===========================================================================================================
 //
@@ -62,6 +70,41 @@ Message* Message::clone() {
     return ptr;
 }
 
+//===========================================================================================================
+//
+//          WirelessMessage  (class)
+//
+//===========================================================================================================
+
+WirelessMessage::WirelessMessage(unsigned int destId) {
+    id = nextId;
+    destinationId = destId;
+    nextId++;
+    nbMessages++;
+    MESSAGE_CONSTRUCTOR_INFO();
+}
+
+WirelessMessage::~WirelessMessage() {
+    MESSAGE_DESTRUCTOR_INFO();
+    nbMessages--;
+}
+
+uint64_t WirelessMessage::getNbMessages() {
+    return(nbMessages);
+}
+
+string WirelessMessage::getMessageName() {
+    return("generic wireless message");
+}
+
+WirelessMessage* WirelessMessage::clone() {
+    WirelessMessage* ptr = new WirelessMessage(destinationId);
+    ptr->sourceInterface = sourceInterface;
+    //ptr->destinationInterface = destinationInterface;
+    ptr->type = type;
+    return ptr;
+}
+
 //==========================================================================================================
 //
 //	    NetworkInterface  (class)
@@ -76,16 +119,26 @@ NetworkInterface::NetworkInterface(BaseSimulator::BuildingBlock *b){
 	connectedInterface = NULL;	
 }
 
+NetworkInterface::~NetworkInterface() {
+}
+
 //===========================================================================================================
 //
 //          P2PNetworkInterface  (class)
 //
 //===========================================================================================================
 
-P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b):NetworkInterface(b) {
+//P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b):NetworkInterface(b) {
+P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b) {
 #ifndef NDEBUG
 	OUTPUT << "P2PNetworkInterface constructor" << endl;
 #endif
+    hostBlock = b;
+    availabilityDate=0;
+    globalId=nextId;
+    nextId++;
+    dataRate = new StaticRate(defaultDataRate);
+    connectedInterface = NULL;
 }
 
 void P2PNetworkInterface::setDataRate(Rate *r) {
@@ -200,6 +253,17 @@ bool P2PNetworkInterface::isConnected() {
 //
 //======================================================================================================
 
+WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power) {
+#ifndef NDEBUG
+    OUTPUT << "WirelessNetworkInterface constructor" << endl;
+#endif
+    transmitPower = power;
+    hostBlock = b;
+    availabilityDate=0;
+    globalId=nextId;
+    nextId++;
+    dataRate = new StaticRate(defaultDataRate);
+}
 
 WirelessNetworkInterface::~WirelessNetworkInterface(){
 #ifndef NDEBUG
@@ -207,18 +271,37 @@ WirelessNetworkInterface::~WirelessNetworkInterface(){
 #endif
 }
 
-/*Send the message if the destination robot is within range*/
-void WirelessNetworkInterface::send(Message *m){
-	double distance;
-	Vector3D vec1;
-	Vector3D vec2;
-	vec1=m->sourceInterface->hostBlock->getPositionVector();
-	vec2=m->destinationInterface->hostBlock->getPositionVector();
-	distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
-	if (distance < this->range)
-		getScheduler()->schedule(new NetworkInterfaceEnqueueOutgoingEvent(getScheduler()->now(),m,this));
+// Effectively start the transmission
+// Do not call this function directly, it is called automatically when the previous transmission in the outgoing queue terminates
+void WirelessNetworkInterface::send(){
+    // ici il va falloir faire une boucle pour envoyer à toutes les cartes réseau des environs
+    // Il faut récupérer la map de l'objet World
+    
+//	double distance;
+//	Vector3D vec1;
+//	Vector3D vec2;
+//	vec1=m->sourceInterface->hostBlock->getPositionVector();
+//	vec2=m->destinationInterface->hostBlock->getPositionVector();
+//	distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
+//		getScheduler()->schedule(new NetworkInterfaceEnqueueOutgoingEvent(getScheduler()->now(),m,this));
 }
 
-void WirelessNetworkInterface::setRange(int dist){
-	this->range = dist;
+void WirelessNetworkInterface::setPower(int power){
+	this->transmitPower = power;
+}
+
+bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
+    stringstream info;
+  
+    outgoingQueue.push_back(msg);
+    //BaseSimulator::utils::StatsIndividual::incOutgoingMessageQueueSize(hostBlock->stats);
+    if (availabilityDate < BaseSimulator::getScheduler()->now()) availabilityDate = BaseSimulator::getScheduler()->now();
+    if (outgoingQueue.size() == 1 && messageBeingTransmitted == NULL) {
+        //
+        // Scheduling this event instead of directly calling send() allows for taking into account processing time
+        //
+        BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartTransmittingEvent(availabilityDate,this));
+    }
+    // as long as there is no limit to the buffer size, this function will return true
+    return(true);
 }
