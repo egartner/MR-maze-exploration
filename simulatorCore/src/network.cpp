@@ -264,12 +264,23 @@ WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock 
     globalId=nextId;
     nextId++;
     dataRate = new StaticRate(defaultDataRate);
+    // arbitrary value, please adjust to fit your simulated radio equipment
+    receptionThreshold = 10;
+    collisionOccuring = false;
 }
 
 WirelessNetworkInterface::~WirelessNetworkInterface(){
 #ifndef NDEBUG
 	OUTPUT<< "WirelessNetworkInterface destructor" << endl;
 #endif
+}
+
+
+void WirelessNetworkInterface::setReceptionThreshold(float threshold) {
+    receptionThreshold = threshold;
+}
+float WirelessNetworkInterface::getReceptionThreshold() {
+    return(receptionThreshold);
 }
 
 // Effectively start the transmission
@@ -313,7 +324,9 @@ void WirelessNetworkInterface::send(){
 void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     // ici il faut calculer l'atténuation en fonction de la distance et choisir si le paquet sera compris ou non
     // Si il est compris, il faut regarder si il nous est destiné
-    // Si il nous est destiné, il faut le passer à la couche supérieure (scheduleLocalEvent)
+    // Si il nous est destiné, on commence la réception
+    // Pour cela, on stocke une référence sur le message et on schedule un WirelessNetworkInterfaceStopReceiveEvent
+    // Si une autre transmission se présente avant la fin de la réception, ça fera une collision
     
     double distance;
     Vector3D vec1;
@@ -322,12 +335,60 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     vec2=this->hostBlock->getPositionVector();
     distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
     
+    float pathLoss = 0;
+    // ici il faut calculer une atténuation en fonction de la distance.
+    // Par exemple on peut utiliser un modèle hybride tworayground / Friss
+    // c.f. la section tworayground dans https://www.nsnam.org/docs/release/3.25/models/html/propagation.html
+    
+    float shadowing = 0;
+    // ceci ajoute de la variabilité dans le temps à l'atténuation
+    // ce terme doit être distribué de façon gaussienne
+    // habituellement on prend un écart type de 7, mais celà dépend de l'environnement.
+    // il faudra que ce soit paramétrable
+    // c.f. http://www.isi.edu/nsnam/ns/doc/node220.html
+    
+    
+    // la puissance reçue est la puissance émise moins l'atténuation liée à la distance et moins la variabilité.
+    float receivedPower = msg->sourceInterface->getTransmitPower()-pathLoss-shadowing;
+    
+    if (receivedPower > receptionThreshold) {
+        // le paquet est reçu avec une puissance suffisante pour être compris
+        // on commence donc à le recevoir ...
+        
+        // mais si au cours de la réception un autre paquet se présente avec une puissance suffisante, il brouillera
+        // celui en cours de réception.
+        // il va falloir gérer ces cas
+        messageBeingReceived = msg;
+        
+        // TODO
+        // la durée de transmission doit dépendre de la taille du message et du débit
+        Time transmissionDuration = 10;
+        BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+    }
+    
     // [...]
 }
 
-void WirelessNetworkInterface::setPower(int power){
+void WirelessNetworkInterface::stopReceive() {
+    // la transmission du message se termine
+    // il faut regarder si une collision a eu lieu au cours de sa transmission
+    //
+    // si il n'y a pas eu collision il faut le passer à la couche supérieure (scheduleLocalEvent)
+    
+    if (!collisionOccuring) {
+        this->hostBlock->scheduleLocalEvent(EventPtr(new WirelessNetworkInterfaceMessageReceivedEvent(BaseSimulator::getScheduler()->now(),this,messageBeingReceived)));
+    }
+    
+}
+
+void WirelessNetworkInterface::setTransmitPower(int power){
 	this->transmitPower = power;
 }
+
+float WirelessNetworkInterface::getTransmitPower(){
+    return(this->transmitPower);
+}
+
 
 Time WirelessNetworkInterface::getTransmissionDuration(WirelessMessagePtr &m) {
     double rate = dataRate->get();

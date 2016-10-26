@@ -309,6 +309,33 @@ const string NetworkInterfaceReceiveEvent::getEventName() {
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceMessageReceivedEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceMessageReceivedEvent::WirelessNetworkInterfaceMessageReceivedEvent(Time t, WirelessNetworkInterface *ni, WirelessMessagePtr mes):Event(t) {
+    eventType = EVENT_WNI_MESSAGE_RECEIVED;
+    interface = ni;
+    message = mes;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceMessageReceivedEvent::~WirelessNetworkInterfaceMessageReceivedEvent() {
+    message.reset();
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceMessageReceivedEvent::consume() {
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceMessageReceivedEvent::getEventName() {
+    return("WirelessNetworkInterfaceMessageReceivedEvent Event");
+}
+
+//===========================================================================================================
+//
 //          WirelessNetworkInterfaceStartReceiveEvent  (class)
 //
 //===========================================================================================================
@@ -333,6 +360,32 @@ void WirelessNetworkInterfaceStartReceiveEvent::consume() {
 
 const string WirelessNetworkInterfaceStartReceiveEvent::getEventName() {
     return("WirelessNetworkInterfaceStartReceiveEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStopReceiveEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceStopReceiveEvent::WirelessNetworkInterfaceStopReceiveEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_STOP_RECEIVE;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceStopReceiveEvent::~WirelessNetworkInterfaceStopReceiveEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStopReceiveEvent::consume() {
+    interface->stopReceive();
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceStopReceiveEvent::getEventName() {
+    return("WirelessNetworkInterfaceStopReceiveEvent Event");
 }
 
 //===========================================================================================================

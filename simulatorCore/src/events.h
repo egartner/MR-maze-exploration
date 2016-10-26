@@ -246,6 +246,39 @@ public:
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceStopReceiveEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceStopReceiveEvent : public Event {
+public:
+    WirelessNetworkInterface *interface;
+    //NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
+    WirelessNetworkInterfaceStopReceiveEvent(Time t,WirelessNetworkInterface *ni);
+    ~WirelessNetworkInterfaceStopReceiveEvent();
+    void consume();
+    const virtual string getEventName();
+};
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceMessageReceivedEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceMessageReceivedEvent : public Event {
+public:
+    WirelessNetworkInterface *interface;
+    WirelessMessagePtr message;
+    //NetworkInterfaceReceiveEvent(Time,NetworkInterface *ni, MessagePtr mes);
+    WirelessNetworkInterfaceMessageReceivedEvent(Time,WirelessNetworkInterface *ni, WirelessMessagePtr mes);
+    ~WirelessNetworkInterfaceMessageReceivedEvent();
+    void consume();
+    const virtual string getEventName();
+};
+
+//===========================================================================================================
+//
 //          NetworkInterfaceEnqueueOutgoingEvent  (class)
 //
 //===========================================================================================================

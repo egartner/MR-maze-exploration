@@ -222,6 +222,9 @@ protected:
     BaseSimulator::Rate* dataRate;
 	// unsigned int range;
     float transmitPower;
+    float receptionThreshold;
+    WirelessMessagePtr messageBeingReceived;
+    bool collisionOccuring;
 public:
     unsigned int globalId;
     unsigned int localId;
@@ -233,10 +236,16 @@ public:
     
     WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power);
 	~WirelessNetworkInterface();
+    
+    void setReceptionThreshold(float threshold);
+    float getReceptionThreshold();
+    
     bool addToOutgoingBuffer(WirelessMessagePtr msg);
 	void send();
     void startReceive(WirelessMessagePtr msg);
-	void setPower(int power);
+    void stopReceive();
+	void setTransmitPower(int power);
+    float getTransmitPower();
 	Time getTransmissionDuration(WirelessMessagePtr &m);
 };
 #endif /* NETWORK_H_ */
