@@ -220,11 +220,12 @@ protected:
     static int defaultDataRate;
     
     BaseSimulator::Rate* dataRate;
-	// unsigned int range;
     float transmitPower;
     float receptionThreshold;
     WirelessMessagePtr messageBeingReceived;
     bool collisionOccuring;
+    bool transmitting;
+    bool receiving;
 public:
     unsigned int globalId;
     unsigned int localId;
@@ -241,11 +242,13 @@ public:
     float getReceptionThreshold();
     
     bool addToOutgoingBuffer(WirelessMessagePtr msg);
-	void send();
+    void send();
     void startReceive(WirelessMessagePtr msg);
     void stopReceive();
-	void setTransmitPower(int power);
+    void setTransmitPower(int power);
     float getTransmitPower();
-	Time getTransmissionDuration(WirelessMessagePtr &m);
+    float pathLoss(float power, float distance, float transmissionGain, float receptionGain, float tHeight, float rHeight); 
+    float shadowing(float exponent, float distance, float deviation);
+    Time getTransmissionDuration(WirelessMessagePtr &m);
 };
 #endif /* NETWORK_H_ */

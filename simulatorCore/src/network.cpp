@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <random>
 
 #include "scheduler.h"
 #include "network.h"
@@ -267,6 +268,8 @@ WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock 
     // arbitrary value, please adjust to fit your simulated radio equipment
     receptionThreshold = 10;
     collisionOccuring = false;
+    transmitting = false;
+    receiving = false;
 }
 
 WirelessNetworkInterface::~WirelessNetworkInterface(){
@@ -286,15 +289,6 @@ float WirelessNetworkInterface::getReceptionThreshold() {
 // Effectively start the transmission
 // Do not call this function directly, it is called automatically when the previous transmission in the outgoing queue terminates
 void WirelessNetworkInterface::send(){
-    // ici il va falloir faire une boucle pour envoyer à toutes les cartes réseau des environs
-    // Il faut récupérer la map de l'objet World
-    
-    // ATTENTION, pour l'instant l'interface fonctionne en full duplex ... elle peut émettre en même temps qu'elle reçoit
-    // C'EST PHYSIQUEMENT IMPOSSIBLE
-    // Il va falloir gérer cela ...
-    
-    
-    
     WirelessMessagePtr msg;
     stringstream info;
     Time transmissionDuration;
@@ -317,72 +311,52 @@ void WirelessNetworkInterface::send(){
     availabilityDate = BaseSimulator::getScheduler()->now()+transmissionDuration;
     /*	info << "*** sending (interface " << localId << " of block " << hostBlock->blockId << ")";
      getScheduler()->trace(info.str());*/
-    
+    transmitting = true;
     BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopTransmittingEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
 }
 
 void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
-    // ici il faut calculer l'atténuation en fonction de la distance et choisir si le paquet sera compris ou non
-    // Si il est compris, il faut regarder si il nous est destiné
-    // Si il nous est destiné, on commence la réception
-    // Pour cela, on stocke une référence sur le message et on schedule un WirelessNetworkInterfaceStopReceiveEvent
-    // Si une autre transmission se présente avant la fin de la réception, ça fera une collision
     
-    double distance;
+    float distance;
+    float receivedPower = 0;
     Vector3D vec1;
     Vector3D vec2;
     vec1=msg->sourceInterface->hostBlock->getPositionVector();
     vec2=this->hostBlock->getPositionVector();
     distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
-    
-    float pathLoss = 0;
-    // ici il faut calculer une atténuation en fonction de la distance.
-    // Par exemple on peut utiliser un modèle hybride tworayground / Friss
-    // c.f. la section tworayground dans https://www.nsnam.org/docs/release/3.25/models/html/propagation.html
-    
-    float shadowing = 0;
-    // ceci ajoute de la variabilité dans le temps à l'atténuation
-    // ce terme doit être distribué de façon gaussienne
-    // habituellement on prend un écart type de 7, mais celà dépend de l'environnement.
-    // il faudra que ce soit paramétrable
-    // c.f. http://www.isi.edu/nsnam/ns/doc/node220.html
-    
-    
-    // la puissance reçue est la puissance émise moins l'atténuation liée à la distance et moins la variabilité.
-    float receivedPower = msg->sourceInterface->getTransmitPower()-pathLoss-shadowing;
+
+    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0, 1.0) - shadowing(2.0, distance, 4.0);
     
     if (receivedPower > receptionThreshold) {
-        // le paquet est reçu avec une puissance suffisante pour être compris
-        // on commence donc à le recevoir ...
-        
-        // mais si au cours de la réception un autre paquet se présente avec une puissance suffisante, il brouillera
-        // celui en cours de réception.
-        // il va falloir gérer ces cas
         messageBeingReceived = msg;
-        
-        // TODO
-        // la durée de transmission doit dépendre de la taille du message et du débit
-        Time transmissionDuration = 10;
-        BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+	
+	if(msg->destinationId == this->hostBlock->blockId && receiving == false) {         
+        	Time transmissionDuration = getTransmissionDuration(msg);
+		receiving = true;
+        	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+	}
+	else if(msg->destinationId == this->hostBlock->blockId && receiving == true) {
+		collisionOccuring=true;
+	}
     }
     
-    // [...]
 }
 
 void WirelessNetworkInterface::stopReceive() {
-    // la transmission du message se termine
-    // il faut regarder si une collision a eu lieu au cours de sa transmission
-    //
-    // si il n'y a pas eu collision il faut le passer à la couche supérieure (scheduleLocalEvent)
-    
+
     if (!collisionOccuring) {
         this->hostBlock->scheduleLocalEvent(EventPtr(new WirelessNetworkInterfaceMessageReceivedEvent(BaseSimulator::getScheduler()->now(),this,messageBeingReceived)));
     }
-    
+	
+    else {
+	collisionOccuring = false;
+    }
+
+    receiving = false;
 }
 
 void WirelessNetworkInterface::setTransmitPower(int power){
-	this->transmitPower = power;
+    this->transmitPower = power;
 }
 
 float WirelessNetworkInterface::getTransmitPower(){
@@ -411,4 +385,17 @@ bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
     }
     // as long as there is no limit to the buffer size, this function will return true
     return(true);
+}
+
+float WirelessNetworkInterface::pathLoss(float power, float distance, float transmissionGain, float receptionGain, float tHeight, float rHeight){
+//Compute the path lost using the two-ray ground model 
+	float receivedPower = (power * transmissionGain * receptionGain * tHeight * rHeight)/pow(distance, 4);
+	return receivedPower;
+}
+
+float WirelessNetworkInterface::shadowing(float exponent, float distance, float deviation){
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution(0, deviation);
+	float shadowing = -10 * exponent * log(distance) + distribution(generator);
+	return shadowing;
 }
