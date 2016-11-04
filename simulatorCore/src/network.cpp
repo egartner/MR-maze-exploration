@@ -32,10 +32,10 @@ uint64_t WirelessMessage::nbMessages = 0;
 
 unsigned int NetworkInterface::nextId = 0;
 int NetworkInterface::defaultDataRate = 1000000;
-unsigned int P2PNetworkInterface::nextId = 0;
-int P2PNetworkInterface::defaultDataRate = 1000000;
-unsigned int WirelessNetworkInterface::nextId = 0;
-int WirelessNetworkInterface::defaultDataRate = 1000000;
+//unsigned int P2PNetworkInterface::nextId = 0;
+//int P2PNetworkInterface::defaultDataRate = 1000000;
+//unsigned int WirelessNetworkInterface::nextId = 0;
+//int WirelessNetworkInterface::defaultDataRate = 1000000;
 
 
 //===========================================================================================================
@@ -117,8 +117,6 @@ NetworkInterface::NetworkInterface(BaseSimulator::BuildingBlock *b){
 	availabilityDate=0;
 	globalId=nextId;
 	nextId++;
-	dataRate = new StaticRate(defaultDataRate);
-	connectedInterface = NULL;	
 }
 
 NetworkInterface::~NetworkInterface() {
@@ -130,15 +128,10 @@ NetworkInterface::~NetworkInterface() {
 //
 //===========================================================================================================
 
-//P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b):NetworkInterface(b) {
-P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b) {
+P2PNetworkInterface::P2PNetworkInterface(BaseSimulator::BuildingBlock *b) : NetworkInterface(b){
 #ifndef NDEBUG
 	OUTPUT << "P2PNetworkInterface constructor" << endl;
 #endif
-    hostBlock = b;
-    availabilityDate=0;
-    globalId=nextId;
-    nextId++;
     dataRate = new StaticRate(defaultDataRate);
     connectedInterface = NULL;
 }
@@ -255,17 +248,13 @@ bool P2PNetworkInterface::isConnected() {
 //
 //======================================================================================================
 
-WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power) {
+WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power) : NetworkInterface(b){
 #ifndef NDEBUG
     OUTPUT << "WirelessNetworkInterface constructor" << endl;
 #endif
-    transmitPower = power;
-    hostBlock = b;
-    availabilityDate=0;
-    globalId=nextId;
-    nextId++;
     dataRate = new StaticRate(defaultDataRate);
     // arbitrary value, please adjust to fit your simulated radio equipment
+    transmitPower = power;
     receptionThreshold = 10;
     collisionOccuring = false;
     transmitting = false;

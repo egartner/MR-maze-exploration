@@ -132,17 +132,11 @@ protected :
 public:
 	unsigned int globalId;
 	unsigned int localId;
-	deque<MessagePtr> outgoingQueue;
 	BaseSimulator::BuildingBlock * hostBlock;
 	Time availabilityDate;
-	NetworkInterface *connectedInterface;
-
-	MessagePtr messageBeingTransmitted;
 
 	NetworkInterface(BaseSimulator::BuildingBlock *b);
 	virtual ~NetworkInterface() = 0;
-
-	virtual void send(Message *m) = 0;
 	virtual void send() = 0;
 };
 
@@ -153,33 +147,18 @@ public:
 //
 //===========================================================================================================
 
-//class P2PNetworkInterface : public NetworkInterface {
-class P2PNetworkInterface {
-    protected :
-    static unsigned int nextId;
-    static int defaultDataRate;
-
-    BaseSimulator::Rate* dataRate;
-    
+class P2PNetworkInterface : public NetworkInterface {
 public:
-    unsigned int globalId;
-    unsigned int localId;
-    deque<MessagePtr> outgoingQueue;
-    BaseSimulator::BuildingBlock * hostBlock;
-    Time availabilityDate;
-    
-    MessagePtr messageBeingTransmitted;
-
-    
-    P2PNetworkInterface *connectedInterface;
-    
+	MessagePtr messageBeingTransmitted;
+	deque<MessagePtr> outgoingQueue;
+	P2PNetworkInterface *connectedInterface;
 	P2PNetworkInterface(BaseSimulator::BuildingBlock *b);
 	~P2PNetworkInterface();
 	
 	void send(Message *m);
 	
 	bool addToOutgoingBuffer(MessagePtr msg);
-	void send();
+	virtual void send();
 	void connect(P2PNetworkInterface *ni);
 	int getConnectedBlockId() {
         return (connectedInterface!=NULL && connectedInterface->hostBlock!=NULL)?connectedInterface->hostBlock->blockId:-1;
@@ -214,27 +193,17 @@ public:
 // wireless.
 //
 // Remettre le système de statitiques (statsIndividual)
-class WirelessNetworkInterface {
+class WirelessNetworkInterface : public NetworkInterface {
 protected:
-    static unsigned int nextId;
-    static int defaultDataRate;
-    
-    BaseSimulator::Rate* dataRate;
     float transmitPower;
     float receptionThreshold;
-    WirelessMessagePtr messageBeingReceived;
     bool collisionOccuring;
     bool transmitting;
     bool receiving;
+    WirelessMessagePtr messageBeingReceived;
 public:
-    unsigned int globalId;
-    unsigned int localId;
-    deque<WirelessMessagePtr> outgoingQueue;
-    BaseSimulator::BuildingBlock * hostBlock;
-    Time availabilityDate;
-    
     WirelessMessagePtr messageBeingTransmitted;
-    
+    deque<WirelessMessagePtr> outgoingQueue;
     WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power);
 	~WirelessNetworkInterface();
     
@@ -242,7 +211,7 @@ public:
     float getReceptionThreshold();
     
     bool addToOutgoingBuffer(WirelessMessagePtr msg);
-    void send();
+    virtual void send();
     void startReceive(WirelessMessagePtr msg);
     void stopReceive();
     void setTransmitPower(int power);

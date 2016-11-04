@@ -60,8 +60,7 @@ protected:
 	static bool userConfigHasBeenParsed; //!< Indicates if the user parsing as already been performed by blockCode->parseUserElements. Used to ensure that user configuration is parsed only once.
 	
 	vector<P2PNetworkInterface*> P2PNetworkInterfaces; //!< Vector of size equal to the number of interfaces of the block, contains pointers to the block's interfaces
-
-    WirelessNetworkInterface *wirelessNetworkInterface;
+	WirelessNetworkInterface *wirelessNetworkInterface;
     
 	list<EventPtr> localEventsList; //!< List of local events scheduled for this block
 public:
