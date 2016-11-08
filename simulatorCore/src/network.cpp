@@ -17,6 +17,8 @@
 #include "utils.h"
 #include "world.h"
 
+#define SHADOWING_EXPONENT 2
+#define SHADOWING_DEVIATION 4
 
 using namespace std;
 using namespace BaseSimulator;
@@ -314,7 +316,7 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     vec2=this->hostBlock->getPositionVector();
     distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
 
-    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0, 1.0) - shadowing(2.0, distance, 4.0);
+    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0, 1.0) - shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
     
     if (receivedPower > receptionThreshold) {
         messageBeingReceived = msg;

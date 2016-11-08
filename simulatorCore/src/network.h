@@ -219,5 +219,7 @@ public:
     float pathLoss(float power, float distance, float transmissionGain, float receptionGain, float tHeight, float rHeight); 
     float shadowing(float exponent, float distance, float deviation);
     Time getTransmissionDuration(WirelessMessagePtr &m);
+    bool isTransmitting(){return transmitting;};
+    bool isReceiving(){return receiving;};
 };
 #endif /* NETWORK_H_ */
