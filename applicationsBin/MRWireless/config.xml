@@ -7,7 +7,7 @@
 	<blockList color="255,255,255" size="1,1,1" blockSize="71,71,65" >
 		<block position="4,0,0"/>
 		<block position="6,4,0"/>
-		<block position="6,6,6"/>	
+		<block position="3,6,0"/>	
 	</blockList>
 </world>
 

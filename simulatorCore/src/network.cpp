@@ -104,7 +104,6 @@ string WirelessMessage::getMessageName() {
 WirelessMessage* WirelessMessage::clone() {
     WirelessMessage* ptr = new WirelessMessage(destinationId);
     ptr->sourceInterface = sourceInterface;
-    //ptr->destinationInterface = destinationInterface;
     ptr->type = type;
     return ptr;
 }
@@ -307,7 +306,7 @@ void WirelessNetworkInterface::send(){
 }
 
 void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
-    
+    stringstream info;
     float distance;
     float receivedPower = 0;
     Vector3D vec1;
@@ -317,32 +316,29 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
 
     receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0, 1.0) - shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
-    
-    if (receivedPower > receptionThreshold) {
-        messageBeingReceived = msg;
-	
-	if(msg->destinationId == this->hostBlock->blockId && receiving == false) {         
+    info << "Message received with : " << receivedPower;
+    getScheduler()->trace(info.str());
+    if (receivedPower > receptionThreshold && (msg->destinationId == this->hostBlock->blockId || msg->destinationId == 255)) {
+	if(!this->isReceiving()) { 
         	Time transmissionDuration = getTransmissionDuration(msg);
 		receiving = true;
         	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
 	}
-	else if(msg->destinationId == this->hostBlock->blockId && receiving == true) {
-		collisionOccuring=true;
+	else if(this->isReceiving()) {
+		//collisionOccuring=true; TODO uncomment when CSMA/CA is implemented or always collisions
 	}
     }
     
 }
 
 void WirelessNetworkInterface::stopReceive() {
-
+    stringstream info;
     if (!collisionOccuring) {
         this->hostBlock->scheduleLocalEvent(EventPtr(new WirelessNetworkInterfaceMessageReceivedEvent(BaseSimulator::getScheduler()->now(),this,messageBeingReceived)));
-    }
-	
+    }	
     else {
 	collisionOccuring = false;
     }
-
     receiving = false;
 }
 

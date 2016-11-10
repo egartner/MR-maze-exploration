@@ -47,7 +47,6 @@ protected:
 public:
 	uint64_t id;
 	unsigned int type;
-    //NetworkInterface *sourceInterface, *destinationInterface;
 	P2PNetworkInterface *sourceInterface, *destinationInterface;
 
 	Message();
@@ -77,6 +76,35 @@ class MessageOf:public Message {
 
 //===========================================================================================================
 //
+//          P2PMessage  (class)
+//
+//===========================================================================================================
+
+/*
+class P2PMessage {
+public :
+	P2PNetworkInterface *sourceInterface, *destinationInterface;
+	virtual Message* clone();
+};
+
+template <class T>
+class P2PMessageOf:public P2PMessage {
+    T *ptrData;
+    public :
+    MessageOf(int t,const T &data):Message() { type=t; ptrData = new T(data);};
+    ~MessageOf() { delete ptrData; };
+    T* getData() const { return ptrData; };
+    virtual Message* clone() {
+        MessageOf<T> *ptr = new MessageOf<T>(type,*ptrData);
+        ptr->sourceInterface = sourceInterface;
+        ptr->destinationInterface = destinationInterface;
+        return ptr;
+    }
+};
+*/
+
+//===========================================================================================================
+//
 //          WirelessMessage  (class)
 //
 //===========================================================================================================
@@ -91,8 +119,7 @@ public:
 
     WirelessNetworkInterface *sourceInterface;
     bID destinationId;
-    //, *destinationInterface;
-    
+   
     WirelessMessage(bID destId);
     virtual ~WirelessMessage();
     
@@ -113,7 +140,6 @@ class WirelessMessageOf:public WirelessMessage {
     virtual WirelessMessage* clone() {
         WirelessMessageOf<T> *ptr = new WirelessMessageOf<T>(type,*ptrData, destinationId);
         ptr->sourceInterface = sourceInterface;
-        //ptr->destinationInterface = destinationInterface;
         return ptr;
     }
 };
