@@ -323,6 +323,23 @@ public:
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceChannelListeningEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceChannelListeningEvent : public Event {
+public:
+    WirelessNetworkInterface *interface;
+    
+    WirelessNetworkInterfaceChannelListeningEvent(Time, WirelessNetworkInterface *ni);
+    ~WirelessNetworkInterfaceChannelListeningEvent();
+    void consume();
+    const virtual string getEventName();
+};
+
+
+//===========================================================================================================
+//
 //          SetColorEvent  (class)
 //
 //===========================================================================================================

@@ -53,7 +53,7 @@ bool BuildingBlock::userConfigHasBeenParsed = false;
         P2PNetworkInterfaces.push_back(new P2PNetworkInterface(this));
     }
 	
-    wirelessNetworkInterface = new WirelessNetworkInterface(this,100);
+    wirelessNetworkInterface = new WirelessNetworkInterface(this,4.5);
     //setDefaultHardwareParameters();
     
     blockCode = (BaseSimulator::BlockCode*)bcb(this);

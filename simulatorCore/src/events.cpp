@@ -429,7 +429,6 @@ const string NetworkInterfaceEnqueueOutgoingEvent::getEventName() {
 //
 //===========================================================================================================
 
-//NetworkInterfaceEnqueueOutgoingEvent::NetworkInterfaceEnqueueOutgoingEvent(Time t, Message *mes, NetworkInterface *ni):Event(t) {
 WirelessNetworkInterfaceEnqueueOutgoingEvent::WirelessNetworkInterfaceEnqueueOutgoingEvent(Time t, WirelessMessage *mes, WirelessNetworkInterface *ni):Event(t) {
     eventType = EVENT_WNI_ENQUEUE_OUTGOING_MESSAGE;
     message = WirelessMessagePtr(mes);
@@ -458,7 +457,41 @@ const string WirelessNetworkInterfaceEnqueueOutgoingEvent::getEventName() {
     return("WirelessNetworkInterfaceEnqueueOutgoingEvent Event");
 }
 
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceChannelListeningEvent  (class)
+//
+//===========================================================================================================
+WirelessNetworkInterfaceChannelListeningEvent::WirelessNetworkInterfaceChannelListeningEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_CHANNEL_LISTENING;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
 
+WirelessNetworkInterfaceChannelListeningEvent::~WirelessNetworkInterfaceChannelListeningEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceChannelListeningEvent::consume(){
+    EVENT_CONSUME_INFO();
+    stringstream info;
+    std::random_device rand;
+    std::default_random_engine generator(rand());
+    std::uniform_int_distribution<int> distribution(10,100);
+    int randomBackoff = distribution(generator);
+    info << "RANDOMBACKOFF : " << randomBackoff << endl;
+    getScheduler()->trace(info.str());
+    if (!interface->getAvailability() || interface->first){
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(BaseSimulator::getScheduler()->now()+randomBackoff,interface));
+   	if (interface->first) interface->first=false;
+    }
+    else
+	interface->send();	
+}
+
+const string WirelessNetworkInterfaceChannelListeningEvent::getEventName() {
+    return("WirelessNetworkInterfaceChannelListeningEvent Event");
+}
 //===========================================================================================================
 //
 //          SetColorEvent  (class)

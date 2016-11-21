@@ -254,12 +254,15 @@ WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock 
     OUTPUT << "WirelessNetworkInterface constructor" << endl;
 #endif
     dataRate = new StaticRate(defaultDataRate);
-    // arbitrary value, please adjust to fit your simulated radio equipment
+    // arbitrary values, please adjust to fit your simulated radio equipment
     transmitPower = power;
-    receptionThreshold = 10;
+    receptionThreshold = -82;
+    receptionSensitivity = -97;
     collisionOccuring = false;
     transmitting = false;
     receiving = false;
+    channelAvailability = true;
+    first = true;
 }
 
 WirelessNetworkInterface::~WirelessNetworkInterface(){
@@ -309,25 +312,35 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     stringstream info;
     float distance;
     float receivedPower = 0;
+    float snr = 0;
+    float noiseFloor = -130;
     Vector3D vec1;
     Vector3D vec2;
     vec1=msg->sourceInterface->hostBlock->getPositionVector();
     vec2=this->hostBlock->getPositionVector();
-    distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2));
+    distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2))/6;
 
-    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0, 1.0) - shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
-    info << "Message received with : " << receivedPower;
-    getScheduler()->trace(info.str());
-    if (receivedPower > receptionThreshold && (msg->destinationId == this->hostBlock->blockId || msg->destinationId == 255)) {
-	if(!this->isReceiving()) { 
+    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0) + shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
+    info << "Message received with : " << receivedPower << endl;
+
+    if (receivedPower > receptionSensitivity && receivedPower < receptionThreshold){
+	channelAvailability = false;
+	noiseFloor = receivedPower;
+    }
+
+    if (receivedPower >= receptionThreshold && (msg->destinationId == this->hostBlock->blockId || msg->destinationId == 255)) {
+	snr = receivedPower - noiseFloor;
+	info << "rsb : "<<snr;
+	if(!this->isReceiving() && snr > 15) { 
         	Time transmissionDuration = getTransmissionDuration(msg);
 		receiving = true;
         	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
 	}
-	else if(this->isReceiving()) {
-		//collisionOccuring=true; TODO uncomment when CSMA/CA is implemented or always collisions
+	else {
+		collisionOccuring=true;
 	}
     }
+    getScheduler()->trace(info.str());
     
 }
 
@@ -338,8 +351,11 @@ void WirelessNetworkInterface::stopReceive() {
     }	
     else {
 	collisionOccuring = false;
+	info << "A collision has occured";
+	getScheduler()->trace(info.str());
     }
     receiving = false;
+    BaseSimulator::getWorld()->freeChannel();
 }
 
 void WirelessNetworkInterface::setTransmitPower(int power){
@@ -360,7 +376,6 @@ Time WirelessNetworkInterface::getTransmissionDuration(WirelessMessagePtr &m) {
 
 bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
     stringstream info;
-  
     outgoingQueue.push_back(msg);
     //BaseSimulator::utils::StatsIndividual::incOutgoingMessageQueueSize(hostBlock->stats);
     if (availabilityDate < BaseSimulator::getScheduler()->now()) availabilityDate = BaseSimulator::getScheduler()->now();
@@ -368,21 +383,26 @@ bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
         //
         // Scheduling this event instead of directly calling send() allows for taking into account processing time
         //
-        BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartTransmittingEvent(availabilityDate,this));
+        //BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartTransmittingEvent(availabilityDate,this));
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(availabilityDate,this));
     }
     // as long as there is no limit to the buffer size, this function will return true
     return(true);
 }
 
-float WirelessNetworkInterface::pathLoss(float power, float distance, float transmissionGain, float receptionGain, float tHeight, float rHeight){
-//Compute the path lost using the two-ray ground model 
-	float receivedPower = (power * transmissionGain * receptionGain * tHeight * rHeight)/pow(distance, 4);
+float WirelessNetworkInterface::pathLoss(float power, float distance, float gain, float tHeight, float rHeight){
+//Compute the path loss using the two-ray ground model
+	float receivedPower = power + 10 * log10(pow(tHeight,2)*pow(rHeight,2)) - 40 * log10(distance);
 	return receivedPower;
 }
 
 float WirelessNetworkInterface::shadowing(float exponent, float distance, float deviation){
-	std::default_random_engine generator;
+	stringstream info;
+	std::random_device rand;
+	std::default_random_engine generator(rand());
 	std::normal_distribution<double> distribution(0, deviation);
-	float shadowing = -10 * exponent * log(distance) + distribution(generator);
+	float shadowing =  distribution(generator);
+	info << "shadowing : " << shadowing;
+	getScheduler()->trace(info.str());
 	return shadowing;
 }

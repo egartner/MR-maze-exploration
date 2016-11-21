@@ -223,11 +223,14 @@ class WirelessNetworkInterface : public NetworkInterface {
 protected:
     float transmitPower;
     float receptionThreshold;
+    float receptionSensitivity;
     bool collisionOccuring;
     bool transmitting;
     bool receiving;
+    bool channelAvailability;
     WirelessMessagePtr messageBeingReceived;
 public:
+    bool first;
     WirelessMessagePtr messageBeingTransmitted;
     deque<WirelessMessagePtr> outgoingQueue;
     WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power);
@@ -241,8 +244,10 @@ public:
     void startReceive(WirelessMessagePtr msg);
     void stopReceive();
     void setTransmitPower(int power);
+    void setAvailability(bool availability) { channelAvailability = availability;};
+    bool getAvailability(){return channelAvailability;};
     float getTransmitPower();
-    float pathLoss(float power, float distance, float transmissionGain, float receptionGain, float tHeight, float rHeight); 
+    float pathLoss(float power, float distance, float gain, float tHeight, float rHeight); 
     float shadowing(float exponent, float distance, float deviation);
     Time getTransmissionDuration(WirelessMessagePtr &m);
     bool isTransmitting(){return transmitting;};
