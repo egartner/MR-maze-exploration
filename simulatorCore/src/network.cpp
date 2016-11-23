@@ -316,46 +316,45 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     float noiseFloor = -130;
     Vector3D vec1;
     Vector3D vec2;
+    Time transmissionDuration = getTransmissionDuration(msg);
     vec1=msg->sourceInterface->hostBlock->getPositionVector();
     vec2=this->hostBlock->getPositionVector();
     distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2))/6;
-
-    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0) + shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
-    info << "Message received with : " << receivedPower << endl;
-
-    if (receivedPower > receptionSensitivity && receivedPower < receptionThreshold){
-	channelAvailability = false;
-	noiseFloor = receivedPower;
-    }
-
-    if (receivedPower >= receptionThreshold && (msg->destinationId == this->hostBlock->blockId || msg->destinationId == 255)) {
-	snr = receivedPower - noiseFloor;
-	info << "rsb : "<<snr;
-	if(!this->isReceiving() && snr > 15) { 
-        	Time transmissionDuration = getTransmissionDuration(msg);
-		receiving = true;
-        	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
-	}
-	else {
-		collisionOccuring=true;
-	}
-    }
-    getScheduler()->trace(info.str());
     
+    receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0) + shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
+    //info << "Message received with : " << receivedPower << endl;
+
+    if (receivedPower > receptionSensitivity){
+	channelAvailability = false;
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceIdleEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+	if (receivedPower < receptionThreshold) noiseFloor = receivedPower;
+	else if (receivedPower >= receptionThreshold) {
+		snr = receivedPower - noiseFloor;
+		info << "snr : "<<snr;
+		if(!this->isReceiving() && snr > 15 && (msg->destinationId == this->hostBlock->blockId || msg->destinationId ==255)) { 
+			receiving = true;
+        		BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
+		}
+		else {
+			collisionOccuring = true;
+		}
+    	}
+    }
+    getScheduler()->trace(info.str());   
 }
 
 void WirelessNetworkInterface::stopReceive() {
     stringstream info;
+    receiving = false;
     if (!collisionOccuring) {
         this->hostBlock->scheduleLocalEvent(EventPtr(new WirelessNetworkInterfaceMessageReceivedEvent(BaseSimulator::getScheduler()->now(),this,messageBeingReceived)));
+	info << "No collision occured";
     }	
     else {
 	collisionOccuring = false;
-	info << "A collision has occured";
-	getScheduler()->trace(info.str());
+	info << "A COLLISION HAS OCCURED!";
     }
-    receiving = false;
-    BaseSimulator::getWorld()->freeChannel();
+    getScheduler()->trace(info.str());
 }
 
 void WirelessNetworkInterface::setTransmitPower(int power){

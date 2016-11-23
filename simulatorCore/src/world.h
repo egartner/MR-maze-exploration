@@ -326,13 +326,6 @@ public:
             }
         }
     }
-    
-    void freeChannel(){
-	std::map<bID, BuildingBlock*>::iterator itMap;
-	for (itMap = buildingBlocksMap.begin(); itMap != buildingBlocksMap.end(); itMap++) {
-		itMap->second->getWirelessNetworkInterface()->setAvailability(true);
-	}
-    }
 
 };
 

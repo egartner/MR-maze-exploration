@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "world.h"
 #include "events.h"
 #include "scheduler.h"
 #include "blockCode.h"
@@ -266,13 +267,13 @@ WirelessNetworkInterfaceStopTransmittingEvent::~WirelessNetworkInterfaceStopTran
 
 void WirelessNetworkInterfaceStopTransmittingEvent::consume() {
     EVENT_CONSUME_INFO();
-    
+
     interface->messageBeingTransmitted.reset();
     interface->availabilityDate = BaseSimulator::getScheduler()->now();
     
     if (interface->outgoingQueue.size() > 0) {
         //cout << "one more to send !!" << endl;
-        interface->send();
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(BaseSimulator::getScheduler()->now(),interface));
     }
 }
 
@@ -477,20 +478,44 @@ void WirelessNetworkInterfaceChannelListeningEvent::consume(){
     stringstream info;
     std::random_device rand;
     std::default_random_engine generator(rand());
-    std::uniform_int_distribution<int> distribution(10,100);
+    std::uniform_int_distribution<int> distribution(0,200);
     int randomBackoff = distribution(generator);
-    info << "RANDOMBACKOFF : " << randomBackoff << endl;
-    getScheduler()->trace(info.str());
     if (!interface->getAvailability() || interface->first){
+	info << "Channel used";
 	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(BaseSimulator::getScheduler()->now()+randomBackoff,interface));
    	if (interface->first) interface->first=false;
     }
     else
 	interface->send();	
+    getScheduler()->trace(info.str());
 }
 
 const string WirelessNetworkInterfaceChannelListeningEvent::getEventName() {
     return("WirelessNetworkInterfaceChannelListeningEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceIdleEvent  (class)
+//
+//===========================================================================================================
+WirelessNetworkInterfaceIdleEvent::WirelessNetworkInterfaceIdleEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_IDLE;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceIdleEvent::~WirelessNetworkInterfaceIdleEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceIdleEvent::consume(){
+    EVENT_CONSUME_INFO();
+    interface->setAvailability(true);
+}
+
+const string WirelessNetworkInterfaceIdleEvent::getEventName() {
+    return("WirelessNetworkInterfaceIdleEvent Event");
 }
 //===========================================================================================================
 //

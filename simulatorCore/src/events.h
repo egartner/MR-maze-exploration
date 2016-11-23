@@ -337,6 +337,21 @@ public:
     const virtual string getEventName();
 };
 
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceIdleEvent  (class)
+//
+//===========================================================================================================
+
+class WirelessNetworkInterfaceIdleEvent : public Event {
+public:
+    WirelessNetworkInterface *interface;
+    
+    WirelessNetworkInterfaceIdleEvent(Time, WirelessNetworkInterface *ni);
+    ~WirelessNetworkInterfaceIdleEvent();
+    void consume();
+    const virtual string getEventName();
+};
 
 //===========================================================================================================
 //
