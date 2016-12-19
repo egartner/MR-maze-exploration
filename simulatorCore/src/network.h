@@ -203,22 +203,6 @@ public:
 //
 //==========================================================================================================
 
-// TODO
-// La puissance d'émission est configurée sur l'interface d'envoi
-// Mais le calcul d'atténuation doit être effectué sur le recepteur (pour pouvoir gérer les collisions).
-// La puissance d'émission doit donc être transmise au récepteur pour qu'il puisse effectuer le calcul.
-//
-// On n'exprime en général pas la puissance par une portée en mètre, mais par des dbm ou des watts.
-// Un calcul permet de calculer une distance moyenne en fonction de la puissance (et en fonction du modèle
-// de propagation utilisé).
-//
-// Il faut pouvoir faire la distinction entre les message broadcastés et ceux unicastés
-// Il faut ajouter une adresse destination au message, alors qu'il n'y en avait pas dans les interfaces P2P
-// Normalement, l'adresse destination est propre à la carte réseau ciblée ( et donc différente de l'ID du bloc)
-// Ici on peut peut-être simplifier en utilisant l'ID du bloc (mais cela signifie qu'un bloc ne peut avoir qu'une interface
-// wireless.
-//
-// Remettre le système de statitiques (statsIndividual)
 class WirelessNetworkInterface : public NetworkInterface {
 protected:
     float transmitPower;
@@ -233,7 +217,7 @@ public:
     bool first;
     WirelessMessagePtr messageBeingTransmitted;
     deque<WirelessMessagePtr> outgoingQueue;
-    WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power);
+    WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power, float threshold, float sensitivity);
 	~WirelessNetworkInterface();
     
     void setReceptionThreshold(float threshold);

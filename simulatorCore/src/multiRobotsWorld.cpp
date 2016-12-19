@@ -28,6 +28,8 @@ MultiRobotsWorld::MultiRobotsWorld(const Cell3DPosition &gridSize, const Vector3
 	OUTPUT << "\033[1;31mMultiRobotsWorld constructor\033[0m" << endl;
 
 	if (GlutContext::GUIisEnabled) {
+		objObstacle = new ObjLoader::ObjLoader("../../simulatorCore/resources/textures/blinkyBlocksTextures","blinkyBlockSimple.obj");		
+
 		objBlock = new ObjLoader::ObjLoader("../../simulatorCore/resources/textures/multiRobotsTextures",
                                             "multiRobotSimple.obj");
 		objBlockForPicking = NULL;
@@ -183,6 +185,21 @@ void MultiRobotsWorld::glDrawId() {
 	lock();
 	while (ic!=tabGlBlocks.end()) {
 		((MultiRobotsGlBlock*)(*ic))->glDrawId(objBlock,n);
+		ic++;
+	}
+	unlock();
+	glPopMatrix();
+}
+
+void MultiRobotsWorld::glDrawObstacles() {
+	glPushMatrix();
+	glTranslatef(0.5*lattice->gridScale[0],0.5*lattice->gridScale[1],0);
+	glDisable(GL_TEXTURE_2D);
+	vector <GlObstacle*>::iterator ic=tabGlObstacles.begin();
+	int n=1;
+	lock();
+	while (ic!=tabGlObstacles.end()) {
+		((MultiRobotsGlBlock*)(*ic))->glDrawId(objObstacle,n);
 		ic++;
 	}
 	unlock();

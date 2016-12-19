@@ -478,7 +478,7 @@ void WirelessNetworkInterfaceChannelListeningEvent::consume(){
     stringstream info;
     std::random_device rand;
     std::default_random_engine generator(rand());
-    std::uniform_int_distribution<int> distribution(0,200);
+    std::uniform_int_distribution<int> distribution(0,400);
     int randomBackoff = distribution(generator);
     if (!interface->getAvailability() || interface->first){
 	info << "Channel used";

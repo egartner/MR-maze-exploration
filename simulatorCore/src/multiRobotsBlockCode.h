@@ -24,6 +24,8 @@ public:
 	virtual void init() {};
 	
 	virtual void processLocalEvent(EventPtr pev) = 0;
+
+	virtual void parseUserElements(TiXmlDocument *config);
 };
 
 }

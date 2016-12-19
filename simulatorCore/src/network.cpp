@@ -249,15 +249,15 @@ bool P2PNetworkInterface::isConnected() {
 //
 //======================================================================================================
 
-WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power) : NetworkInterface(b){
+WirelessNetworkInterface::WirelessNetworkInterface(BaseSimulator::BuildingBlock *b, float power, float threshold, float sensitivity) : NetworkInterface(b){
 #ifndef NDEBUG
     OUTPUT << "WirelessNetworkInterface constructor" << endl;
 #endif
     dataRate = new StaticRate(defaultDataRate);
     // arbitrary values, please adjust to fit your simulated radio equipment
     transmitPower = power;
-    receptionThreshold = -82;
-    receptionSensitivity = -97;
+    receptionThreshold = threshold; 
+    receptionSensitivity = sensitivity; 
     collisionOccuring = false;
     transmitting = false;
     receiving = false;
@@ -319,7 +319,7 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
     Time transmissionDuration = getTransmissionDuration(msg);
     vec1=msg->sourceInterface->hostBlock->getPositionVector();
     vec2=this->hostBlock->getPositionVector();
-    distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2))/6;
+    distance = sqrt(pow(abs(vec1.pt[0] - vec2.pt[0]),2)+pow(abs(vec1.pt[1] - vec2.pt[1]),2))*10;
     
     receivedPower = pathLoss(msg->sourceInterface->getTransmitPower(), distance, 1.0, 1.0, 1.0) + shadowing(SHADOWING_EXPONENT, distance, SHADOWING_DEVIATION);
     //info << "Message received with : " << receivedPower << endl;
@@ -331,11 +331,11 @@ void WirelessNetworkInterface::startReceive(WirelessMessagePtr msg) {
 	else if (receivedPower >= receptionThreshold) {
 		snr = receivedPower - noiseFloor;
 		info << "snr : "<<snr;
-		if(!this->isReceiving() && snr > 15 && (msg->destinationId == this->hostBlock->blockId || msg->destinationId ==255)) { 
+		if(!this->isReceiving() && snr >= 15 && (msg->destinationId == this->hostBlock->blockId || msg->destinationId ==255)) { 
 			receiving = true;
         		BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStopReceiveEvent(BaseSimulator::getScheduler()->now()+transmissionDuration, this));
 		}
-		else {
+		else if (this->isReceiving() || snr < 15){
 			collisionOccuring = true;
 		}
     	}
@@ -348,13 +348,12 @@ void WirelessNetworkInterface::stopReceive() {
     receiving = false;
     if (!collisionOccuring) {
         this->hostBlock->scheduleLocalEvent(EventPtr(new WirelessNetworkInterfaceMessageReceivedEvent(BaseSimulator::getScheduler()->now(),this,messageBeingReceived)));
-	info << "No collision occured";
     }	
     else {
 	collisionOccuring = false;
 	info << "A COLLISION HAS OCCURED!";
+	getScheduler()->trace(info.str());
     }
-    getScheduler()->trace(info.str());
 }
 
 void WirelessNetworkInterface::setTransmitPower(int power){
@@ -382,7 +381,6 @@ bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
         //
         // Scheduling this event instead of directly calling send() allows for taking into account processing time
         //
-        //BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartTransmittingEvent(availabilityDate,this));
 	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(availabilityDate,this));
     }
     // as long as there is no limit to the buffer size, this function will return true
@@ -391,7 +389,7 @@ bool WirelessNetworkInterface::addToOutgoingBuffer(WirelessMessagePtr msg) {
 
 float WirelessNetworkInterface::pathLoss(float power, float distance, float gain, float tHeight, float rHeight){
 //Compute the path loss using the two-ray ground model
-	float receivedPower = power + 10 * log10(pow(tHeight,2)*pow(rHeight,2)) - 40 * log10(distance);
+	float receivedPower = power + 10 * log10(pow(tHeight,2)*pow(rHeight,2)) - 25 * log10(distance);
 	return receivedPower;
 }
 
@@ -402,6 +400,6 @@ float WirelessNetworkInterface::shadowing(float exponent, float distance, float 
 	std::normal_distribution<double> distribution(0, deviation);
 	float shadowing =  distribution(generator);
 	info << "shadowing : " << shadowing;
-	getScheduler()->trace(info.str());
+	//getScheduler()->trace(info.str());
 	return shadowing;
 }

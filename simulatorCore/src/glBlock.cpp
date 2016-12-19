@@ -4,7 +4,8 @@
 
 #include "objLoader.h"
 
-GlBlock::GlBlock(bID id):blockId(id) {
+/************************ CLASS GlObject ************************/
+GlObject::GlObject(bID id):blockId(id) {
 	position[0] = 0.0;
 	position[1] = 0.0;
 	position[2] = 0.0;
@@ -15,7 +16,7 @@ GlBlock::GlBlock(bID id):blockId(id) {
 	isHighlighted = false;
 }
 
-GlBlock::GlBlock(bID id,const Vector3D &pos, const Vector3D &col) : blockId(id) {
+GlObject::GlObject(bID id,const Vector3D &pos, const Vector3D &col) : blockId(id) {
 	position[0] = pos[0];
 	position[1] = pos[1];
 	position[2] = pos[2];
@@ -26,39 +27,35 @@ GlBlock::GlBlock(bID id,const Vector3D &pos, const Vector3D &col) : blockId(id) 
 	isHighlighted = false;
 }
 
-GlBlock::~GlBlock() {
-
-}
-
-void GlBlock::setPosition(const Vector3D &pos) {
+void GlObject::setPosition(const Vector3D &pos) {
 	position[0] = GLfloat(pos[0]);
 	position[1] = GLfloat(pos[1]);
 	position[2] = GLfloat(pos[2]);
 }
 
-void GlBlock::setColor(const Vector3D &col) {
+void GlObject::setColor(const Vector3D &col) {
 	color[0] = GLfloat(col[0]);
 	color[1] = GLfloat(col[1]);
 	color[2] = GLfloat(col[2]);
 	color[3] = 1.0;
 }
 
-void GlBlock::setColor(const Color &col) {
+void GlObject::setColor(const Color &col) {
 	color[0] = col[0];
 	color[1] = col[1];
 	color[2] = col[2];
 	color[3] = 1.0;
 }
 
-void GlBlock::setVisible(bool visible) {
+void GlObject::setVisible(bool visible) {
     color[3] = visible;
 }
 
-void GlBlock::toggleHighlight() {
+void GlObject::toggleHighlight() {
 	isHighlighted=!isHighlighted;
 }
 
-string GlBlock::getInfo() {
+string GlObject::getInfo() {
     ostringstream out;
 	out << blockId << "\n";
 	out << fixed;
@@ -69,7 +66,7 @@ string GlBlock::getInfo() {
 	return out.str();
 }
 
-string GlBlock::getPopupInfo() {
+string GlObject::getPopupInfo() {
     ostringstream out;
 	out << blockId << "\n";
 
@@ -77,16 +74,20 @@ string GlBlock::getPopupInfo() {
 }
 
 
-void GlBlock::glDrawId(ObjLoader::ObjLoader *ptrObj,int &n) {
+void GlObject::glDrawId(ObjLoader::ObjLoader *ptrObj,int &n) {
 	glPushMatrix();
 	glTranslatef(position[0],position[1],position[2]);
 	ptrObj->glDrawId(n);
 	glPopMatrix();
 }
 
-void GlBlock::glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n) {
+void GlObject::glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n) {
 	glPushMatrix();
 	glTranslatef(position[0],position[1],position[2]);
 	ptrObj->glDrawIdByMaterial(n);
 	glPopMatrix();
 }
+
+/************************ CLASS GlObject ************************/
+
+
