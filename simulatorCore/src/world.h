@@ -51,7 +51,7 @@ protected:
     GLushort numSelectedFace; //!< The id of the face (NeighborDirection) selected by the user
     GLuint numSelectedGlBlock; //!< The index of the block selected by the user in the tabGlBlock
 
-    ObjLoader::ObjLoader *objObstacle = NULL;
+    ObjLoader::ObjLoader *objObstacle = NULL;	     //!< Object loader for an obstacle
     ObjLoader::ObjLoader *objBlock = NULL;           //!< Object loader for a block
     ObjLoader::ObjLoader *objBlockForPicking = NULL; //!< Object loader for a block used during picking
     ObjLoader::ObjLoader *objRepere = NULL;          //!< Object loader for the frame

@@ -88,6 +88,4 @@ void GlObject::glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n) {
 	glPopMatrix();
 }
 
-/************************ CLASS GlObject ************************/
-
 

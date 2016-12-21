@@ -55,7 +55,8 @@ World::~World() {
 		delete *cit;
 		cit++;
 	}
-
+	
+	//free glObstacles
 	std::vector<GlObstacle*>::const_iterator itObstacles=tabGlObstacles.begin();
 	while (itObstacles!=tabGlObstacles.end()) {
 		delete *itObstacles;
