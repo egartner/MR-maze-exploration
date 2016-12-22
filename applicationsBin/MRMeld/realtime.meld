@@ -1,0 +1,2 @@
+type route edge (node, node).
+type route at (node, int, int, int). 
