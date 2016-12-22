@@ -22,4 +22,8 @@ MultiRobotsBlockCode::~MultiRobotsBlockCode() {
 	OUTPUT << "MultiRobotsBlockCode destructor" << endl;
 }
 
+void MultiRobotsBlockCode::parseUserElements(TiXmlDocument *config){
+	
+}
+
 }

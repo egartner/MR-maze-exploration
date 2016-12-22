@@ -12,9 +12,10 @@
 #include "multiRobotsWorld.h"
 #include "multiRobotsSimulator.h"
 #include "translationEvents.h"
-#include "meldInterpretEvents.h"
 #include "trace.h"
 #include "clock.h"
+#include "meldInterpretEvents.h"
+#include "network.h"
 
 using namespace std;
 
@@ -41,10 +42,10 @@ void MultiRobotsBlock::stopBlock(Time date, State s) {
 		color = Color(0.1, 0.1, 0.1, 0.5);
     }
 
-	getWorld()->updateGlData(this);
+    getWorld()->updateGlData(this);
 
-	if (BaseSimulator::Simulator::getType() == BaseSimulator::Simulator::MELDINTERPRET) {
-		getScheduler()->schedule(new MeldInterpret::VMStopEvent(getScheduler()->now(), this));
+    if (BaseSimulator::Simulator::getType() == BaseSimulator::Simulator::MELDINTERPRET) {
+	getScheduler()->schedule(new MeldInterpret::VMStopEvent(getScheduler()->now(), this));
     }
 }
 

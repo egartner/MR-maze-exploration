@@ -18,6 +18,7 @@ namespace BaseSimulator {
 World *World::world=NULL;
 map<bID, BuildingBlock*>World::buildingBlocksMap;
 vector <GlBlock*>World::tabGlBlocks;
+vector <GlObstacle*>World::tabGlObstacles;
 
 World::World(int argc, char *argv[]) {
 	OUTPUT << "World constructor" << endl;
@@ -54,6 +55,13 @@ World::~World() {
 		delete *cit;
 		cit++;
 	}
+	
+	//free glObstacles
+	std::vector<GlObstacle*>::const_iterator itObstacles=tabGlObstacles.begin();
+	while (itObstacles!=tabGlObstacles.end()) {
+		delete *itObstacles;
+		itObstacles++;
+	}
 
 	// /* free Scenario Events */
 	// vector<ScenarioEvent*>::const_iterator it=tabEvents.begin();
@@ -66,9 +74,10 @@ World::~World() {
 	delete lattice;
 	delete camera;
 	// delete [] targetGrid;
+	delete objObstacle;
 	delete objBlock;
-    delete objBlockForPicking;
-    delete objRepere;
+	delete objBlockForPicking;
+	delete objRepere;
 
 	OUTPUT << "World destructor" << endl;
 }
@@ -248,13 +257,13 @@ void World::tapBlock(Time date, bID bId, int face) {
 }
 
 void World::addObstacle(const Cell3DPosition &pos,const Color &col) {
-	GlBlock *glBlock = new GlBlock(-1);
-    Vector3D position(lattice->gridScale[0]*pos[0],
+	GlObstacle *glObstacle = new GlObstacle(-1);
+	Vector3D position(lattice->gridScale[0]*pos[0],
 					  lattice->gridScale[1]*pos[1],
 					  lattice->gridScale[2]*pos[2]);
-	glBlock->setPosition(position);
-	glBlock->setColor(col);
-	tabGlBlocks.push_back(glBlock);
+	glObstacle->setPosition(position);
+	glObstacle->setColor(col);
+	tabGlObstacles.push_back(glObstacle);
 }
 
 

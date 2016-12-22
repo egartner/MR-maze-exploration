@@ -40,6 +40,7 @@ protected:
      ************************************************************/    
     static World *world;        //!< Global variable to access the single simulation instance of World 
     static vector<GlBlock*>tabGlBlocks; //!< A vector containing pointers to all graphical blocks
+    static vector<GlObstacle*>tabGlObstacles; //!< A vector containing pointers to all graphical obstacles
     static map<bID, BuildingBlock*>buildingBlocksMap; //!< A map containing all BuildingBlocks in the world, indexed by their blockId
 
     /************************************************************
@@ -50,6 +51,7 @@ protected:
     GLushort numSelectedFace; //!< The id of the face (NeighborDirection) selected by the user
     GLuint numSelectedGlBlock; //!< The index of the block selected by the user in the tabGlBlock
 
+    ObjLoader::ObjLoader *objObstacle = NULL;	     //!< Object loader for an obstacle
     ObjLoader::ObjLoader *objBlock = NULL;           //!< Object loader for a block
     ObjLoader::ObjLoader *objBlockForPicking = NULL; //!< Object loader for a block used during picking
     ObjLoader::ObjLoader *objRepere = NULL;          //!< Object loader for the frame
@@ -243,6 +245,10 @@ public:
      */
     void glDrawBackground();
     /**
+     * @brief Draws the obstacles
+     */
+    void glDrawObstacles(){};
+    /**
      * @brief Draws the background for different types of world
      */
     virtual void glDrawSpecificBg() {};
@@ -316,6 +322,17 @@ public:
      * @brief Toggle world background
      */
     void toggleBackground() { background = !background; }
+    
+    void broadcastWirelessMessage(WirelessMessagePtr msg) {
+        std::map<bID, BuildingBlock*>::iterator itMap;
+        bID sourceID = msg->sourceInterface->hostBlock->blockId;
+        for (itMap = buildingBlocksMap.begin(); itMap != buildingBlocksMap.end(); itMap++) {
+            if (itMap->first != sourceID) {
+                BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceStartReceiveEvent(BaseSimulator::getScheduler()->now(), itMap->second->getWirelessNetworkInterface(), msg));
+            }
+        }
+    }
+
 };
 
 /**

@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "world.h"
 #include "events.h"
 #include "scheduler.h"
 #include "blockCode.h"
@@ -164,6 +165,7 @@ const string ProcessLocalEvent::getEventName() {
 //
 //===========================================================================================================
 
+//NetworkInterfaceStartTransmittingEvent::NetworkInterfaceStartTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
 NetworkInterfaceStartTransmittingEvent::NetworkInterfaceStartTransmittingEvent(Time t, P2PNetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_START_TRANSMITTING;
 	interface = ni;
@@ -184,10 +186,36 @@ const string NetworkInterfaceStartTransmittingEvent::getEventName() {
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceStartTransmittingEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceStartTransmittingEvent::NetworkInterfaceStartTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
+WirelessNetworkInterfaceStartTransmittingEvent::WirelessNetworkInterfaceStartTransmittingEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_START_TRANSMITTING;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+WirelessNetworkInterfaceStartTransmittingEvent::~WirelessNetworkInterfaceStartTransmittingEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStartTransmittingEvent::consume() {
+    EVENT_CONSUME_INFO();
+    interface->send();
+}
+
+const string WirelessNetworkInterfaceStartTransmittingEvent::getEventName() {
+    return("WirelessNetworkInterfaceStartTransmitting Event");
+}
+
+//===========================================================================================================
+//
 //          NetworkInterfaceStopTransmittingEvent  (class)
 //
 //===========================================================================================================
 
+//NetworkInterfaceStopTransmittingEvent::NetworkInterfaceStopTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
 NetworkInterfaceStopTransmittingEvent::NetworkInterfaceStopTransmittingEvent(Time t, P2PNetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_STOP_TRANSMITTING;
 	interface = ni;
@@ -223,10 +251,43 @@ const string NetworkInterfaceStopTransmittingEvent::getEventName() {
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceStopTransmittingEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceStopTransmittingEvent::NetworkInterfaceStopTransmittingEvent(Time t, NetworkInterface *ni):Event(t) {
+WirelessNetworkInterfaceStopTransmittingEvent::WirelessNetworkInterfaceStopTransmittingEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_STOP_TRANSMITTING;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+WirelessNetworkInterfaceStopTransmittingEvent::~WirelessNetworkInterfaceStopTransmittingEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStopTransmittingEvent::consume() {
+    EVENT_CONSUME_INFO();
+
+    interface->messageBeingTransmitted.reset();
+    interface->availabilityDate = BaseSimulator::getScheduler()->now();
+    
+    if (interface->outgoingQueue.size() > 0) {
+        //cout << "one more to send !!" << endl;
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(BaseSimulator::getScheduler()->now(),interface));
+    }
+}
+
+const string WirelessNetworkInterfaceStopTransmittingEvent::getEventName() {
+    return("WirelessNetworkInterfaceStopTransmitting Event");
+}
+
+//===========================================================================================================
+//
 //          NetworkInterfaceReceiveEvent  (class)
 //
 //===========================================================================================================
 
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
 NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, P2PNetworkInterface *ni, MessagePtr mes):Event(t) {
 	eventType = EVENT_NI_RECEIVE;
 	interface = ni;
@@ -249,10 +310,92 @@ const string NetworkInterfaceReceiveEvent::getEventName() {
 
 //===========================================================================================================
 //
+//          WirelessNetworkInterfaceMessageReceivedEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceMessageReceivedEvent::WirelessNetworkInterfaceMessageReceivedEvent(Time t, WirelessNetworkInterface *ni, WirelessMessagePtr mes):Event(t) {
+    eventType = EVENT_WNI_MESSAGE_RECEIVED;
+    interface = ni;
+    message = mes;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceMessageReceivedEvent::~WirelessNetworkInterfaceMessageReceivedEvent() {
+    message.reset();
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceMessageReceivedEvent::consume() {
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceMessageReceivedEvent::getEventName() {
+    return("WirelessNetworkInterfaceMessageReceivedEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStartReceiveEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceStartReceiveEvent::WirelessNetworkInterfaceStartReceiveEvent(Time t, WirelessNetworkInterface *ni, WirelessMessagePtr mes):Event(t) {
+    eventType = EVENT_WNI_START_RECEIVE;
+    interface = ni;
+    message = mes;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceStartReceiveEvent::~WirelessNetworkInterfaceStartReceiveEvent() {
+    message.reset();
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStartReceiveEvent::consume() {
+    interface->startReceive(message);
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceStartReceiveEvent::getEventName() {
+    return("WirelessNetworkInterfaceStartReceiveEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceStopReceiveEvent  (class)
+//
+//===========================================================================================================
+
+//NetworkInterfaceReceiveEvent::NetworkInterfaceReceiveEvent(Time t, NetworkInterface *ni, MessagePtr mes):Event(t) {
+WirelessNetworkInterfaceStopReceiveEvent::WirelessNetworkInterfaceStopReceiveEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_STOP_RECEIVE;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceStopReceiveEvent::~WirelessNetworkInterfaceStopReceiveEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceStopReceiveEvent::consume() {
+    interface->stopReceive();
+    EVENT_CONSUME_INFO();
+}
+
+const string WirelessNetworkInterfaceStopReceiveEvent::getEventName() {
+    return("WirelessNetworkInterfaceStopReceiveEvent Event");
+}
+
+//===========================================================================================================
+//
 //          NetworkInterfaceEnqueueOutgoingEvent  (class)
 //
 //===========================================================================================================
 
+//NetworkInterfaceEnqueueOutgoingEvent::NetworkInterfaceEnqueueOutgoingEvent(Time t, Message *mes, NetworkInterface *ni):Event(t) {
 NetworkInterfaceEnqueueOutgoingEvent::NetworkInterfaceEnqueueOutgoingEvent(Time t, Message *mes, P2PNetworkInterface *ni):Event(t) {
 	eventType = EVENT_NI_ENQUEUE_OUTGOING_MESSAGE;
 	message = MessagePtr(mes);
@@ -281,7 +424,99 @@ const string NetworkInterfaceEnqueueOutgoingEvent::getEventName() {
 	return("NetworkInterfaceEnqueueOutgoingEvent Event");
 }
 
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceEnqueueOutgoingEvent  (class)
+//
+//===========================================================================================================
 
+WirelessNetworkInterfaceEnqueueOutgoingEvent::WirelessNetworkInterfaceEnqueueOutgoingEvent(Time t, WirelessMessage *mes, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_ENQUEUE_OUTGOING_MESSAGE;
+    message = WirelessMessagePtr(mes);
+    sourceInterface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceEnqueueOutgoingEvent::WirelessNetworkInterfaceEnqueueOutgoingEvent(Time t, WirelessMessagePtr mes, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_ENQUEUE_OUTGOING_MESSAGE;
+    message = mes;
+    sourceInterface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceEnqueueOutgoingEvent::~WirelessNetworkInterfaceEnqueueOutgoingEvent() {
+    message.reset();
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceEnqueueOutgoingEvent::consume() {
+    EVENT_CONSUME_INFO();
+    sourceInterface->addToOutgoingBuffer(message);
+}
+
+const string WirelessNetworkInterfaceEnqueueOutgoingEvent::getEventName() {
+    return("WirelessNetworkInterfaceEnqueueOutgoingEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceChannelListeningEvent  (class)
+//
+//===========================================================================================================
+WirelessNetworkInterfaceChannelListeningEvent::WirelessNetworkInterfaceChannelListeningEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_CHANNEL_LISTENING;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceChannelListeningEvent::~WirelessNetworkInterfaceChannelListeningEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceChannelListeningEvent::consume(){
+    EVENT_CONSUME_INFO();
+    stringstream info;
+    std::random_device rand;
+    std::default_random_engine generator(rand());
+    std::uniform_int_distribution<int> distribution(0,400);
+    int randomBackoff = distribution(generator);
+    if (!interface->getAvailability() || interface->first){
+	info << "Channel used";
+	BaseSimulator::getScheduler()->schedule(new WirelessNetworkInterfaceChannelListeningEvent(BaseSimulator::getScheduler()->now()+randomBackoff,interface));
+   	if (interface->first) interface->first=false;
+    }
+    else
+	interface->send();	
+    getScheduler()->trace(info.str());
+}
+
+const string WirelessNetworkInterfaceChannelListeningEvent::getEventName() {
+    return("WirelessNetworkInterfaceChannelListeningEvent Event");
+}
+
+//===========================================================================================================
+//
+//          WirelessNetworkInterfaceIdleEvent  (class)
+//
+//===========================================================================================================
+WirelessNetworkInterfaceIdleEvent::WirelessNetworkInterfaceIdleEvent(Time t, WirelessNetworkInterface *ni):Event(t) {
+    eventType = EVENT_WNI_IDLE;
+    interface = ni;
+    EVENT_CONSTRUCTOR_INFO();
+}
+
+WirelessNetworkInterfaceIdleEvent::~WirelessNetworkInterfaceIdleEvent() {
+    EVENT_DESTRUCTOR_INFO();
+}
+
+void WirelessNetworkInterfaceIdleEvent::consume(){
+    EVENT_CONSUME_INFO();
+    interface->setAvailability(true);
+}
+
+const string WirelessNetworkInterfaceIdleEvent::getEventName() {
+    return("WirelessNetworkInterfaceIdleEvent Event");
+}
 //===========================================================================================================
 //
 //          SetColorEvent  (class)

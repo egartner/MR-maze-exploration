@@ -27,6 +27,7 @@ typedef std::shared_ptr<Event> EventPtr;
 using namespace std;
 
 class P2PNetworkInterface;
+class WirelessNetworkInterface;
 
 namespace BaseSimulator {
 
@@ -59,7 +60,8 @@ protected:
 	static bool userConfigHasBeenParsed; //!< Indicates if the user parsing as already been performed by blockCode->parseUserElements. Used to ensure that user configuration is parsed only once.
 	
 	vector<P2PNetworkInterface*> P2PNetworkInterfaces; //!< Vector of size equal to the number of interfaces of the block, contains pointers to the block's interfaces
-
+	WirelessNetworkInterface *wirelessNetworkInterface;
+    
 	list<EventPtr> localEventsList; //!< List of local events scheduled for this block
 public:
     bID blockId; //!< id of the block
@@ -132,6 +134,10 @@ public:
 	 * @brief Schedules a local event for this block to process when available
 	 * @param pev : pointer to the event to schedule
 	 */
+    WirelessNetworkInterface *getWirelessNetworkInterface() {
+        return wirelessNetworkInterface;
+    }
+    
 	void scheduleLocalEvent(EventPtr pev);
 	/**
 	 * @brief Processes the first event from the event queue

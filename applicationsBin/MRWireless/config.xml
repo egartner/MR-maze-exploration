@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="no" ?>
+
+<world gridSize="100,100,100" windowSize="1800,900">
+	<camera target="200,200,500" directionSpherical="0,70,500" angle="90"/>
+	<spotlight target="200,20,200" directionSpherical="45,60,500" angle="40"/>
+	
+	<blockList color="255,255,255" size="1,1,1" blockSize="71,71,65" >
+		<block position="1,0,0"/>
+		<block position="20,20,0"/>
+		<block position="50,50,0"/>
+		<block position="2,2,0"/>
+		<block position="5,10,0"/>
+		<block position ="30,18,0"/>
+		<block position ="99,99,0"/>
+		<block position ="11,10,0"/>	
+		<block position ="13,10,0"/>	
+		<block position ="25,10,0"/>	
+		<block position ="22,10,0"/>	
+		<block position ="50,10,0"/>	
+		<block position ="34,10,0"/>	
+		<block position ="42,10,0"/>	
+		<block position ="60,10,0"/>	
+		<block position ="77,10,0"/>	
+		<block position ="66,10,0"/>	
+		<block position ="99,10,0"/>	
+		<block position ="1,10,0"/>
+		<block position="1,1,0"/>
+		<block position="1,2,0"/>
+		<block position="3,3,0"/>
+		<block position="4,4,0"/>
+		<block position="5,5,0"/>
+		<block position="6,6,0"/>
+		<block position="7,7,0"/>
+		<block position="8,8,0"/>
+		<block position="9,9,0"/>
+		<block position="10,10,0"/>
+		<block position="11,11,0"/>
+		<block position="12,12,0"/>
+		<block position="13,13,0"/>
+		<block position="14,14,0"/>
+		<block position="15,15,0"/>
+		<block position="16,16,0"/>
+		<block position="17,17,0"/>
+		<block position="18,18,0"/>
+		<block position="19,19,0"/>
+		<block position="21,21,0"/>
+		<block position="22,22,0"/>
+		<block position="23,23,0"/>
+		<block position="24,24,0"/>
+		<block position="25,25,0"/>
+		<block position="26,26,0"/>
+		<block position="27,27,0"/>
+		<block position="28,28,0"/>
+		<block position="29,29,0"/>
+		<block position="30,30,0"/>
+		<block position="31,31,0"/>
+		<block position="32,32,0"/>
+		<block position="33,33,0"/>
+		<block position="34,34,0"/>
+	</blockList>
+</world>
+
+

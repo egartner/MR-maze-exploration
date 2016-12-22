@@ -19,17 +19,17 @@ class ObjLoader;
 
 using namespace std;
 
-class GlBlock {
+class GlObject {
 protected :
     bool isHighlighted;
 public :
+    bID blockId;
     GLfloat position[3];
     GLfloat color[4];
-    bID blockId;
 
-    GlBlock(bID id);
-    GlBlock(bID id,const Vector3D &pos, const Vector3D &col);
-    virtual ~GlBlock();
+    GlObject(bID id);
+    GlObject(bID id,const Vector3D &pos, const Vector3D &col);
+    virtual ~GlObject(){};
 
     virtual void setPosition(const Vector3D &p);
     virtual void setColor(const Color &c);
@@ -43,6 +43,31 @@ public :
     virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
     virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
     virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
+
+};
+
+class GlObstacle : public GlObject {
+public :
+    GlObstacle(bID id) : GlObject(id){};
+    GlObstacle(bID id, const Vector3D &pos, const Vector3D &col) : GlObject(id, pos, col){};
+    virtual ~GlObstacle(){};
+/*
+    virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
+    virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
+    virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
+*/
+};
+
+class GlBlock : public GlObject {
+public :
+    GlBlock(bID id) : GlObject(id){};
+    GlBlock(bID id,const Vector3D &pos, const Vector3D &col) : GlObject(id, pos, col){};
+    virtual ~GlBlock(){};
+/*
+    virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
+    virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
+    virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
+*/
 };
 
 #endif /* GLBLOCK_H_ */
