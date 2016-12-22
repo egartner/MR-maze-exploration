@@ -28,7 +28,7 @@ MultiRobotsWorld::MultiRobotsWorld(const Cell3DPosition &gridSize, const Vector3
 	OUTPUT << "\033[1;31mMultiRobotsWorld constructor\033[0m" << endl;
 
 	if (GlutContext::GUIisEnabled) {
-		//objObstacle = new ObjLoader::ObjLoader("../../simulatorCore/resources/textures/multiRobotsTextures","multiRobotSimple.obj");		
+		objObstacle = new ObjLoader::ObjLoader("../../simulatorCore/resources/textures/multiRobotsTextures","multiRobotSimple.obj");		
 
 		objBlock = new ObjLoader::ObjLoader("../../simulatorCore/resources/textures/multiRobotsTextures",
                                             "multiRobotSimple.obj");
