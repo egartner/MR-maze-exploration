@@ -206,8 +206,9 @@ void GlutContext::mouseFunc(int button,int state,int x,int y) {
 				if (state==GLUT_DOWN) {
 					camera->mouseDown(x,y);
 					int n=selectFunc(x,y);
-					GlBlock *glb = BaseSimulator::getWorld()->getBlockByNum(n-1);
-					GlBlock *glbs = BaseSimulator::getWorld()->getselectedGlBlock();
+					//GlBlock *glb = BaseSimulator::getWorld()->getBlockByNum(n-1);
+					GlObject *glb = BaseSimulator::getWorld()->getObjectByNum(n-1);
+					GlObject *glbs = BaseSimulator::getWorld()->getselectedGlObject();
 					int face=selectFaceFunc(x,y);
 					if (glbs != NULL && glbs == glb) {
 						BaseSimulator::getWorld()->tapBlock(BaseSimulator::getScheduler()->now(),

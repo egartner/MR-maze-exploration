@@ -48,6 +48,8 @@ protected:
      ************************************************************/        
     bool background = true; //!< Option for visible background 
     GlBlock *selectedGlBlock; //!< A pointer to the GlBlock selected by the user
+    GlObstacle *selectedGlObstacle; //!< A pointer to the GlObstacle selected by the user
+    GlObject *selectedGlObject; //!< A pointer to the GlObject selected by the user
     GLushort numSelectedFace; //!< The id of the face (NeighborDirection) selected by the user
     GLuint numSelectedGlBlock; //!< The index of the block selected by the user in the tabGlBlock
 
@@ -198,6 +200,15 @@ public:
      */
     virtual GlBlock* getselectedGlBlock() { return selectedGlBlock; };
     /**
+     * @brief Getter for selectedGlObstacle
+     *
+     * @return pointer to the block selected by the user, or NULL
+     */
+    virtual GlObstacle* getselectedGlObstacle() { return selectedGlObstacle; };
+
+    virtual GlObject* getselectedGlObject() {return selectedGlObject; };
+
+    /**
      * @brief Setter for selectedGlBlock, updates the value of selected block with the block of id n, and returns it
      * @param n : id of the new selectedGlBlock
      * @return a pointer to the selected GlBlock
@@ -215,6 +226,23 @@ public:
      * @param n : id of the Glblock to retrieve
      */
     inline GlBlock* getBlockByNum(bID n) { return tabGlBlocks[n]; };
+    /**
+     * @brief Returns the GlObstacle of id n 
+     * @param n : id of the GlObstacle to retrieve
+     */
+    inline GlObstacle* getObstacleByNum(bID n) { return tabGlObstacles[n]; };
+    /**
+     * @brief Returns the GlObstacle of id n 
+     * @param n : id of the GlObstacle to retrieve
+     */
+    GlObject* getObjectByNum(bID n) {
+	//TODO
+	GlObject *temp;
+	if (tabGlObstacles[n] != NULL) temp = tabGlObstacles[n];
+	else temp = tabGlBlocks[n];
+	return temp; 
+    };
+
     /**
      * @brief Returns the total number of blocks in the world
      * @return the number of blocks in the world
