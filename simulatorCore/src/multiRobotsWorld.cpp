@@ -91,12 +91,20 @@ void MultiRobotsWorld::glDraw() {
 		// glTranslatef(0.5*lattice->gridScale[0],0.5*lattice->gridScale[1],0);
 		glDisable(GL_TEXTURE_2D);
 		vector <GlBlock*>::iterator ic=tabGlBlocks.begin();
+		//vector <GlObstacle*>::iterator icObs=tabGlObstacles.begin();
 		lock();
 		while (ic!=tabGlBlocks.end()) {
 			((MultiRobotsGlBlock*)(*ic))->glDraw(objBlock);
 			ic++;
 		}
 		unlock();
+		
+		/*lock();
+		while (icObs!=tabGlObstacles.end()){
+			//((MultiRobotsGlBlock*)(*ic))->glDraw(objObstacle);
+			ic++;
+		}
+		unlock();*/
 
 		glPopMatrix();
 		glMaterialfv(GL_FRONT,GL_AMBIENT,gray);
@@ -184,7 +192,7 @@ void MultiRobotsWorld::glDrawId() {
 	int n=1;
 	lock();
 	while (ic!=tabGlBlocks.end()) {
-		((MultiRobotsGlBlock*)(*ic))->glDrawId(objBlock,n);
+		((MultiRobotsGlBlock*)(*ic))->glDrawId(objObstacle,n);
 		ic++;
 	}
 	unlock();
