@@ -18,6 +18,7 @@
 #include "events.h"
 #include "configExporter.h"
 #include "trace.h"
+#include "vector3D.h"
 
 using namespace std;
 
@@ -84,27 +85,22 @@ void MultiRobotsWorld::linkBlock(const Cell3DPosition &pos) {
 
 void MultiRobotsWorld::glDraw() {
 	static const GLfloat white[]={0.8f,0.8f,0.8f,1.0f},
-		gray[]={0.2f,0.2f,0.2f,1.0};
+		gray[]={0.2f,0.2f,0.2f,1.0},
+		red[]={1.0f,0.0f,0.0f,1.0f};
 
 		glPushMatrix();
 		glTranslatef(0.5*lattice->gridScale[0],0.5*lattice->gridScale[1],0.5*lattice->gridScale[2]);
 		// glTranslatef(0.5*lattice->gridScale[0],0.5*lattice->gridScale[1],0);
 		glDisable(GL_TEXTURE_2D);
 		vector <GlBlock*>::iterator ic=tabGlBlocks.begin();
-		//vector <GlObstacle*>::iterator icObs=tabGlObstacles.begin();
+		vector <GlObstacle*>::iterator icObs=tabGlObstacles.begin();
+		Vector3D position, position2;
 		lock();
 		while (ic!=tabGlBlocks.end()) {
 			((MultiRobotsGlBlock*)(*ic))->glDraw(objBlock);
 			ic++;
 		}
 		unlock();
-		
-		/*lock();
-		while (icObs!=tabGlObstacles.end()){
-			//((MultiRobotsGlBlock*)(*ic))->glDraw(objObstacle);
-			ic++;
-		}
-		unlock();*/
 
 		glPopMatrix();
 		glMaterialfv(GL_FRONT,GL_AMBIENT,gray);
@@ -182,6 +178,56 @@ void MultiRobotsWorld::glDraw() {
 		glPopMatrix();
 		// draw the axes
 		objRepere->glDraw();
+		while (icObs!=tabGlObstacles.end()){
+			//((MultiRobotsGlObstacle*)(*icObs))->glDraw();
+			position = (*icObs)->getPosition();
+			position2 = (*icObs)->getSecondPosition();
+			position.set(position[0]/71, position[1]/71, position[2]/71, position[3]);
+			position2.set(position2[0]/71, position2[1]/71, position2[2]/71, position2[3]);
+		    	glDisable(GL_CULL_FACE);
+			glMaterialfv(GL_FRONT,GL_AMBIENT,gray);
+			glMaterialfv(GL_FRONT,GL_DIFFUSE,red);
+			glMaterialfv(GL_FRONT,GL_SPECULAR,gray);
+			glMaterialf(GL_FRONT,GL_SHININESS,40.0);
+			glPushMatrix();
+
+			glScalef(lattice->gridScale[0],lattice->gridScale[1],lattice->gridScale[2]);
+			glBegin(GL_QUADS);
+
+			if(position[0] > position2[0] && position[1] == position2[1]){
+				glNormal3f(1.0,0,0);
+				glVertex3f(position2[0]+1, position2[1]+1, position2[2]+1);
+				glVertex3f(position[0], position[1], position[2]);
+				glVertex3f(position[0], position[1], position[2]+1);
+				glVertex3f(position2[0]+1, position2[1]+1, position2[2]);
+			}
+			else if(position[0] < position2[0] && position[1] == position2[1]){
+				glNormal3f(1.0,0,0);
+				glVertex3f(position2[0], position2[1], position2[2]);
+				glVertex3f(position[0]+1, position[1]+1, position[2]);
+				glVertex3f(position[0]+1, position[1]+1, position[2]+1);
+				glVertex3f(position2[0], position2[1], position2[2]+1);
+			}
+			else if(position[1] > position2[1] && position[0] == position2[0]){
+				glNormal3f(0,1.0,0);
+				glVertex3f(position2[0]+1, position2[1]+1, position2[2]+1);
+				glVertex3f(position[0], position[1], position[2]);
+				glVertex3f(position[0], position[1], position[2]+1);
+				glVertex3f(position2[0]+1, position2[1]+1, position2[2]);
+			}
+			else if(position[1] < position2[1] && position[0] == position2[0]){
+				glNormal3f(0,1.0,0);
+				glVertex3f(position2[0], position2[1], position2[2]);
+				glVertex3f(position[0]+1, position[1]+1, position[2]);
+				glVertex3f(position[0]+1, position[1]+1, position[2]+1);
+				glVertex3f(position2[0], position2[1], position2[2]+1);
+			}
+			
+			glEnd();
+			glEnable(GL_CULL_FACE);
+		    	glPopMatrix();
+			icObs++;
+		}
 }
 
 void MultiRobotsWorld::glDrawId() {
@@ -192,21 +238,6 @@ void MultiRobotsWorld::glDrawId() {
 	int n=1;
 	lock();
 	while (ic!=tabGlBlocks.end()) {
-		((MultiRobotsGlBlock*)(*ic))->glDrawId(objObstacle,n);
-		ic++;
-	}
-	unlock();
-	glPopMatrix();
-}
-
-void MultiRobotsWorld::glDrawObstacles() {
-	glPushMatrix();
-	glTranslatef(0.5*lattice->gridScale[0],0.5*lattice->gridScale[1],0);
-	glDisable(GL_TEXTURE_2D);
-	vector <GlObstacle*>::iterator ic=tabGlObstacles.begin();
-	int n=1;
-	lock();
-	while (ic!=tabGlObstacles.end()) {
 		((MultiRobotsGlBlock*)(*ic))->glDrawId(objObstacle,n);
 		ic++;
 	}

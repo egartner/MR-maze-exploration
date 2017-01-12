@@ -6,6 +6,9 @@
  */
 
 #include "multiRobotsGlBlock.h"
+#include "trace.h"
+#include <iostream>
+
 
 namespace MultiRobots {
 
@@ -28,5 +31,6 @@ void MultiRobotsGlBlock::glDraw(ObjLoader::ObjLoader *ptrObj) {
 	ptrObj->glDraw();
     glPopMatrix();
 }
+
 
 }

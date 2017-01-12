@@ -40,6 +40,7 @@ public :
     virtual string getPopupInfo();
     virtual const Vector3D getPosition() { return Vector3D(position[0],position[1],position[2],1); };
 
+    virtual void glDraw() {};
     virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
     virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
     virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
@@ -48,14 +49,12 @@ public :
 
 class GlObstacle : public GlObject {
 public :
+    GLfloat secondPosition[3];
+    void setSecondPosition(const Vector3D &p);
+    const Vector3D getSecondPosition() { return Vector3D(secondPosition[0],secondPosition[1],secondPosition[2],1); };
     GlObstacle(bID id) : GlObject(id){};
     GlObstacle(bID id, const Vector3D &pos, const Vector3D &col) : GlObject(id, pos, col){};
     virtual ~GlObstacle(){};
-/*
-    virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
-    virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
-    virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
-*/
 };
 
 class GlBlock : public GlObject {
@@ -63,11 +62,6 @@ public :
     GlBlock(bID id) : GlObject(id){};
     GlBlock(bID id,const Vector3D &pos, const Vector3D &col) : GlObject(id, pos, col){};
     virtual ~GlBlock(){};
-/*
-    virtual void glDraw(ObjLoader::ObjLoader *ptrObj) {};
-    virtual void glDrawId(ObjLoader::ObjLoader *ptrObj,int &n);
-    virtual void glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n);
-*/
 };
 
 #endif /* GLBLOCK_H_ */

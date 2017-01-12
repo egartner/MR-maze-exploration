@@ -160,7 +160,7 @@ void bMaze::gen(){
 }
 
 void bMaze::printObstacles(){
-	int i0, j0, o_x, o_y;
+	int i0, j0;
 	std::ofstream config;
 	config.open("config.xml", std::ofstream::out | std::ofstream::app);
 	for (int i = 0; i < row; ++i){
@@ -168,14 +168,8 @@ void bMaze::printObstacles(){
 			for (int k = 0 ; k < 2; k++){
 				if (wl[i][j][k]){
 					i0 = i+dir[k][0];
-					j0 = j+dir[k][2];
-					if (i == i0) o_x = 2*i;
-					else if (i > i0) o_x = 2*i-1;
-					else if (i0 > i) o_x = 2*i0-1;
-					if (j == j0) o_y = 2*j;
-					else if (j > j0) o_y = 2*j-1;
-					else if (j0 > j) o_y = 2*j0-1;
-					config << "<obstacle position=\"" << o_x << "," << o_y << ",0\"/>\n";
+					j0 = j+dir[k][1];
+					config << "<obstacle firstCell=\"" << i << "," << j << ",0\" secondCell=\""<< i0 << "," << j0 <<",0\"/>\n";
 				}
 			}
 		}
@@ -209,13 +203,7 @@ void pMaze::printObstacles(){
 				if(wl[i][j][k]){
 					i0 = i+dir[k][0];
 					j0 = j+dir[k][1];
-					if (i == i0) o_x = 2*i;
-					else if (i > i0) o_x = 2*i-1;
-					else if (i0 > i) o_x = 2*i0-1;
-					if (j == j0) o_y = 2*j;
-					else if (j > j0) o_y = 2*j-1;
-					else if (j0 > j) o_y = 2*j0-1;
-					config << "<obstacle position=\"" << o_x << "," << o_y << ",0\"/>\n";
+					config << "<firstCell=\"" << i << "," << j << ",0\" secondCell=\"" << i0 << "," << j0 << ",0\"/>\n";
 				}
 			}
 		}

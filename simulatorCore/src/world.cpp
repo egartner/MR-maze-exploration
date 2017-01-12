@@ -256,12 +256,16 @@ void World::tapBlock(Time date, bID bId, int face) {
 	bb->tap(date, face < lattice->getMaxNumNeighbors() ? face : -1);
 }
 
-void World::addObstacle(const Cell3DPosition &pos,const Color &col) {
-	GlObstacle *glObstacle = new GlObstacle(-1);
-	Vector3D position(lattice->gridScale[0]*pos[0],
-					  lattice->gridScale[1]*pos[1],
-					  lattice->gridScale[2]*pos[2]);
-	glObstacle->setPosition(position);
+void World::addObstacle(const Cell3DPosition &firstPos, const Cell3DPosition &secondPos, const Color &col) {
+	GlObstacle *glObstacle = new GlObstacle(-1); //TODO change ID ?
+	Vector3D firstPosition(lattice->gridScale[0]*firstPos[0],
+					  lattice->gridScale[1]*firstPos[1],
+					  lattice->gridScale[2]*firstPos[2]);
+	Vector3D secondPosition(lattice->gridScale[0]*secondPos[0],
+					  lattice->gridScale[1]*secondPos[1],
+					  lattice->gridScale[2]*secondPos[2]);
+	glObstacle->setPosition(firstPosition);
+	glObstacle->setSecondPosition(secondPosition);
 	glObstacle->setColor(col);
 	tabGlObstacles.push_back(glObstacle);
 }

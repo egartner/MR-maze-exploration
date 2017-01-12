@@ -88,4 +88,8 @@ void GlObject::glDrawIdByMaterial(ObjLoader::ObjLoader *ptrObj,int &n) {
 	glPopMatrix();
 }
 
-
+void GlObstacle::setSecondPosition(const Vector3D &pos) {
+	secondPosition[0] = GLfloat(pos[0]);
+	secondPosition[1] = GLfloat(pos[1]);
+	secondPosition[2] = GLfloat(pos[2]);
+}

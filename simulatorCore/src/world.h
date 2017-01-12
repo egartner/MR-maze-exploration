@@ -191,7 +191,7 @@ public:
      * @param pos : position of the inactive block
      * @param col : color of the obstacle
      */
-    void addObstacle(const Cell3DPosition &pos,const Color &col);
+    void addObstacle(const Cell3DPosition &firstPos, const Cell3DPosition &secondPos, const Color &col);
 
     /**
      * @brief Getter for selectedGlBlock
@@ -272,10 +272,6 @@ public:
      * @brief Draws the world background
      */
     void glDrawBackground();
-    /**
-     * @brief Draws the obstacles
-     */
-    void glDrawObstacles(){};
     /**
      * @brief Draws the background for different types of world
      */
