@@ -15,7 +15,7 @@
 int dir[4][2] = { {1,0}, {0,1}, {0,-1}, {-1,0} };
 
 int main(int argc, char **argv){
-	bMaze *maze = new bMaze();
+	pMaze *maze = new pMaze();
 	maze->init(argc, argv);
 	maze->gen();
 	maze->printConfig();
@@ -165,7 +165,7 @@ void bMaze::printObstacles(){
 	config.open("config.xml", std::ofstream::out | std::ofstream::app);
 	for (int i = 0; i < row; ++i){
 		for (int j = 0; j < column; ++j){
-			for (int k = 0 ; k < 2; k++){
+			for (int k = 0 ; k < 2; ++k){
 				if (wl[i][j][k]){
 					i0 = i+dir[k][0];
 					j0 = j+dir[k][1];
@@ -194,7 +194,7 @@ pMaze::~pMaze(){
 }
 
 void pMaze::printObstacles(){
-	int i0, j0, o_x, o_y;
+	int i0, j0;
 	std::ofstream config;
 	config.open("config.xml", std::ofstream::out | std::ofstream::app);
 	for(int i = 0; i < row; ++i){
@@ -203,7 +203,7 @@ void pMaze::printObstacles(){
 				if(wl[i][j][k]){
 					i0 = i+dir[k][0];
 					j0 = j+dir[k][1];
-					config << "<firstCell=\"" << i << "," << j << ",0\" secondCell=\"" << i0 << "," << j0 << ",0\"/>\n";
+					config << "<obstacle firstCell=\"" << i << "," << j << ",0\" secondCell=\"" << i0 << "," << j0 << ",0\"/>\n";
 				}
 			}
 		}
